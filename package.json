@@ -1,0 +1,25 @@
+{
+  "name": "counselling-study-planner-quasar",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@quasar/extras": "^1.15.3",
+    "fireworks-js": "^2.10.8",
+    "quasar": "^2.23.3",
+    "vue": "^3.4.0",
+    "vue-router": "^4.6.4"
+  },
+  "devDependencies": {
+    "@quasar/vite-plugin": "^1.12.0",
+    "@types/node": "^20.14.0",
+    "@vitejs/plugin-vue": "^4.3.0",
+    "typescript": "^5.5.4",
+    "vite": "^5.4.0"
+  }
+}
