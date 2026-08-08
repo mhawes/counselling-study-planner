@@ -130,7 +130,7 @@
                 <div class="col-9 col-md-3" v-for="source in requiredSources" :key="source">
                   <q-banner :color="unitSourceCount(unit, source) >= (course.rules?.perType?.counts?.[source] ?? 0) ? 'positive' : 'grey-3'" class="q-pa-sm">
                     <div class="text-body2">{{ source }}</div>
-                    <q-chip :color="unitSourceCount(unit, source) >= (course.rules?.perType?.counts?.[source] ?? 0) ? 'positive' : 'warning'" text-color="white">
+                    <q-chip :color="unitSourceCount(unit, source) >= (course.rules?.perType?.counts?.[source] ?? 0) ? getClaimSourceColour(source) : 'grey-9'" text-color="white">
                       {{ unitSourceCount(unit, source) }} / {{ course.rules?.perType?.counts?.[source] ?? 0 }} required
                     </q-chip>
                   </q-banner>
@@ -147,7 +147,7 @@
                     <div class="col-9 col-md-3" v-for="source in requiredSources" :key="source + section.id">
                       <q-banner :color="sectionSourceCount(section, source) >= (course.rules?.perType?.counts?.[source] ?? 0) ? 'positive' : 'grey-3'" class="q-pa-sm">
                         <div class="text-body2">{{ source }}</div>
-                        <q-chip :color="sectionSourceCount(section, source) >= (course.rules?.perType?.counts?.[source] ?? 0) ? 'positive' : 'warning'" text-color="white">
+                        <q-chip :color="sectionSourceCount(section, source) >= (course.rules?.perType?.counts?.[source] ?? 0) ?  getClaimSourceColour(source) : 'grey-3'" text-color="white">
                           {{ sectionSourceCount(section, source) }} / {{ course.rules?.perType?.counts?.[source] ?? 0 }} required
                         </q-chip>
                       </q-banner>
@@ -167,7 +167,7 @@
                         <div class="col">{{ criterion.id }} – {{ criterion.title }}</div>
                         <div class="col-auto">
                           <div class="row items-center q-gutter-xs">
-                            <q-icon v-for="(_, i) in criterion.claims" :key="`claim-${i}`" :name="i < (course.rules?.perCriterion?.count ?? 1) ? 'check_circle' : 'check_circle'" :color="i < (course.rules?.perCriterion?.count ?? 1) ? 'positive' : 'grey-5'" size="sm" />
+                            <q-icon v-for="(claim, i) in criterion.claims" :key="`claim-${i}`" :name="i < (course.rules?.perCriterion?.count ?? 1) ? 'check_circle' : 'circle'" :color="getClaimSourceColour(claim.source)" size="sm" />
                             <q-icon v-for="i in Math.max(0, (course.rules?.perCriterion?.count ?? 1) - criterion.claims.length)" :key="`unclaimed-${i}`" name="radio_button_unchecked" color="grey-5" size="sm" />
                           </div>
                         </div>
@@ -189,6 +189,11 @@
                     <div v-if="criterion.claims.length === 0" class="text-grey">No claims recorded for this criterion yet.</div>
                     <div v-else>
                       <q-table :rows="criterion.claims" :columns="claimColumns" row-key="id" flat dense>
+                        <template #body-cell-source="props">
+                          <q-td :props="props" align="center">
+                            <q-chip :color="getClaimSourceColour(props.row.source)" text-color="white">{{props.row.source}}</q-chip>
+                          </q-td>
+                        </template>
                         <template #body-cell-confirmed="props">
                           <q-td :props="props" align="center">
                             <q-checkbox v-model="props.row.confirmed" @update:model-value="(val) => { props.row.confirmed = val; saveCourse(); }" />
@@ -547,6 +552,19 @@ const submittedWorkGroups = computed(() => {
 
   return Array.from(groups.values());
 });
+
+function getClaimSourceColour(source: ClaimSource) {
+  switch (source) {
+    case 'Written':
+      return 'green';
+    case 'Testimony':
+      return 'blue';
+    case 'TutorObservation':
+      return 'orange';
+    default:
+      return 'grey';
+  }
+}
 
 function matchesText(value: string | null | undefined, query: string) {
   if (!value) {
