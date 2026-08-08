@@ -50,14 +50,16 @@
                             dense
                             flat
                             icon="edit"
+                            color="primary"
                             @click="openAgencyDialog(props.row)"
                           />
-                          <q-btn
-                            dense
-                            flat
+                          <ButtonWithConfirmation
+                            dense 
+                            flat 
                             icon="delete"
                             color="negative"
-                            @click="removeAgency(props.row.id)"
+                            confirm-message="Remove this agency?"
+                            @confirm="removeAgency(props.row.id)"
                           />
                         </div>
                       </q-td>
@@ -108,14 +110,16 @@
                             dense
                             flat
                             icon="edit"
+                            color="primary"
                             @click="openClientDialog(props.row)"
                           />
-                          <q-btn
-                            dense
-                            flat
+                          <ButtonWithConfirmation
+                            dense 
+                            flat 
                             icon="delete"
                             color="negative"
-                            @click="removeClient(props.row.id)"
+                            confirm-message="Remove this client?"
+                            @confirm="removeClient(props.row.id)"
                           />
                         </div>
                       </q-td>
@@ -261,12 +265,13 @@
                     color="primary"
                     @click="openSessionDialog(session)"
                   />
-                  <q-btn
-                    dense
-                    flat
+                  <ButtonWithConfirmation
+                    dense 
+                    flat 
                     icon="delete"
                     color="negative"
-                    @click="removeSession(session.id)"
+                    confirm-message="Remove this session?"
+                    @confirm="removeSession(session.id)"
                   />
                 </q-item-section>
               </q-item>
@@ -326,12 +331,13 @@
                 color="primary"
                 @click="openSupervisionDialog(note)"
               />
-              <q-btn
-                dense
-                flat
+              <ButtonWithConfirmation
+                dense 
+                flat 
                 icon="delete"
                 color="negative"
-                @click="removeSupervisionNote(note.id)"
+                confirm-message="Remove this supervision note?"
+                @confirm="removeSupervisionNote(note.id)"
               />
             </q-item-section>
           </q-item>
@@ -603,6 +609,7 @@ import type {
 } from "@/types";
 import { uuid } from "@/utils/uuid";
 import FireworksDisplay from '@/components/FireworksDisplay.vue';
+import ButtonWithConfirmation from '@/components/ButtonWithConfirmation.vue';
 
 const STORAGE_SESSIONS = "placement-sessions";
 const STORAGE_SUPERVISION = "placement-supervision";

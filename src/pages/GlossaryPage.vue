@@ -27,8 +27,8 @@
                       <div class="row items-center q-gutter-sm">
                         <div class="col">{{ sub.term }} <span class="text-caption">— {{ sub.definition }}</span></div>
                         <div class="col-auto">
-                          <q-btn dense flat icon="edit" @click="openEditSubtermDialog(entry.id, sub)" />
-                          <q-btn dense flat icon="delete" color="negative" @click="removeSubterm(entry.id, sub.id)" />
+                          <q-btn dense flat color="primary" icon="edit" @click="openEditSubtermDialog(entry.id, sub)" />
+                          <ButtonWithConfirmation dense flat color="negative" icon="delete" confirm-message="Remove this sub-term?" @confirm="removeSubterm(entry.id, sub.id)" />
                         </div>
                       </div>
                     </li>
@@ -42,8 +42,8 @@
 
               <div class="col-auto">
                 <div class="row">
-                  <q-btn dense flat icon="edit" @click="openEntryDialog(entry)" />
-                  <q-btn dense flat icon="delete" color="negative" @click="removeEntry(entry.id)" />
+                  <q-btn dense flat color="primary" icon="edit" @click="openEntryDialog(entry)" />
+                  <ButtonWithConfirmation dense flat color="negative" icon="delete" confirm-message="Remove this glossary entry?" @confirm="removeEntry(entry.id)" />
                 </div>
               </div>
             </div>
@@ -113,6 +113,7 @@ import { computed, ref, watch } from 'vue';
 import { Notify } from 'quasar';
 import type { GlossaryEntry } from '@/types';
 import { uuid } from '@/utils/uuid';
+import ButtonWithConfirmation from '@/components/ButtonWithConfirmation.vue';
 
 const STORAGE_KEY = 'glossary-entries';
 

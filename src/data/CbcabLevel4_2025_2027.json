@@ -1,0 +1,854 @@
+{
+  "courseTitle": "Level 4 Diploma in Integrative Therapeutic Counselling",
+  "courseCode": "L4-1-0925-127CC",
+  "courseYear": "2025-2027",
+  "rules": {
+    "perCriterion": { "count": 2 },
+    "perType": {
+      "scope": "unit",
+      "counts": {
+        "Written": 1,
+        "TutorObservation": 1,
+        "Testimony": 1
+      }
+    }
+  },
+  "units": [
+    {
+      "id": "1",
+      "learningOutcome": "Working ethically, safely and professionally as a counsellor",
+      "sections": [
+        {
+          "id": "1.1",
+          "learningOutcome": "Work within an ethical and legal framework",
+          "criteria": [
+            {
+              "id": "1.1.1",
+              "title": "Work within an ethical framework for counselling",
+              "guidance": [
+                "Have a thorough knowledge of the BACP “Ethical Framework for the Counselling Professions” or another similar framework. Be able to explain what is meant by an ethical framework. Explore reasons for (and importance of) working within an ethical framework.",
+                "Ensure your relationships with clients are bounded by a professional framework.",
+                "Introduce clients, using appropriate language, to the existence of a framework.",
+                "Explore reasons for working within a framework for online & telephone counselling."
+              ],
+              "claims": [],
+              "_visible": true
+            },
+            {
+              "id": "1.1.2",
+              "title": "Demonstrate professional standards of conduct",
+              "guidance": [
+                "Discuss meaning of professional standards – including (for example) behaviour, dress, competence, confidentiality, communication with others, professional judgement, integrity, respect, record keeping.",
+                "Recognise responsibilities to clients, employers and the wider profession.",
+                "Explore expectations of conduct in your training group and in your agency.",
+                "Demonstrate professional standards in your own work.",
+                "Demonstrate effective communication through a variety of mediums; in writing, verbally and online."
+              ],
+              "claims": [],
+              "_visible": true
+            },
+            {
+              "id": "1.1.3",
+              "title": "Be able to maintain confidentiality in counselling work",
+              "guidance": [
+                "Clarify the limits of confidentiality within your agency.",
+                "Explore issues around confidentiality in multidisciplinary teams.",
+                "Explore and record examples of difficult confidentiality issues.",
+                "Demonstrate the management of confidentiality issues in own client work."
+              ],
+              "claims": [],
+              "_visible": true
+            },
+            {
+              "id": "1.1.4",
+              "title": "Comply with relevant legal requirements for counselling",
+              "guidance": [
+                "Study up-to-date legislation relevant to your professional practice, including Data Protection Act, The Children Act, The Mental Health Act, the Counter Terrorism and Security Act (Prevent duty), equal opportunities and anti-discriminatory laws and human rights – with reference to safe practice and legal responsibilities.",
+                "Apply legislation to your practice – for example data protection with regard to record keeping and note taking. Discuss limits of confidentiality and reasons for disclosure.",
+                "Develop understanding of the data protection legislation around use of online and digital technologies for working with clients and for storage of their data."
+              ],
+              "claims": [],
+              "_visible": true
+            },
+            {
+              "id": "1.1.5",
+              "title": "Explain the issues relating to the duty of care with regard to the legislation on safeguarding children, young people and vulnerable adults",
+              "guidance": [
+                "Investigate current legislation around risk to and safeguarding of children, young people and vulnerable adults, including the Prevent duty.",
+                "Demonstrate the application of this legislation to your own counselling work.",
+                "Ensure session arrangements and physical settings are safe, secure and appropriate."
+              ],
+              "claims": [],
+              "_visible": true
+            }
+          ],
+          "_visible": true
+        },
+        {
+          "id": "1.2",
+          "learningOutcome": "Work within a counselling service organisation",
+          "criteria": [
+            {
+              "id": "1.2.1",
+              "title": "Work within the ethical, legal and procedural framework in which a given agency operates",
+              "guidance": [
+                "Look at and discuss (e.g. with your supervisor/placement manager) the ethical, legal and procedural framework of your agency.",
+                "To show your understanding in relation to the above issues, apply insights gained from supervision, seminars and counselling practice sessions.",
+                "Explain how you work within the policies and operational systems of your agency, e.g. use of agency IT system and technologies for online / telephone work, bookings diary, record keeping."
+              ],
+              "claims": [],
+              "_visible": true
+            },
+            {
+              "id": "1.2.2",
+              "title": "Use teamwork skills to work with others",
+              "guidance": [
+                "Discuss the meaning and role of teamwork skills.",
+                "Practise the use of these skills to work collaboratively with members of your training group, supervision group and agency personnel.",
+                "Explore (with peers in the training/personal development group, supervision and agency groups) how you relate and collaborate with others.",
+                "Demonstrate your ability to use teamwork skills"
+              ],
+              "claims": [],
+              "_visible": true
+            },
+            {
+              "id": "1.2.3",
+              "title": "Use professional skills to work with others",
+              "guidance": [
+                "Discuss meaning of professional skills and when/where these would be needed in counselling work (for example: for effective communication, professional judgment, confidentiality, referrals).",
+                "Explore and develop understanding of how to manage ‘out of session’ communication and contact with clients - e.g. text, email, telephone, social media etc.",
+                "Demonstrate professional skills in counselling work."
+              ],
+              "claims": [],
+              "_visible": true
+            },
+            {
+              "id": "1.2.4",
+              "title": "Use client assessment to inform the counselling work",
+              "guidance": [
+                "Describe your agency’s process for assessment.",
+                "Describe your agency processes for assessing clients’ suitability for different forms of counselling, e.g. in-person, online or telephone counselling.",
+                "Explore how assessment informs the counselling work.",
+                "Develop understanding of how to conduct initial and ongoing client assessment within your agency.",
+                "With tutor support, conduct client assessment within skills practice sessions.",
+                "Research forms of client assessment and reflect on how these fit with your theoretical approach."
+              ],
+              "claims": [],
+              "_visible": true
+            }
+          ],
+          "_visible": true
+        },
+        {
+          "id": "1.3",
+          "learningOutcome": "Use supervision to work within own limits of proficiency",
+          "criteria": [
+            {
+              "id": "1.3.1",
+              "title": "Monitor limits of proficiency and fitness to practise",
+              "guidance": [
+                "Discuss meaning of limits of proficiency – i.e. only practising when and where you have the appropriate qualifications, training and experience.",
+                "Discuss meaning of fitness to practice – i.e. working only when you have the skills, knowledge, character and health (emotional and physical) to practise safely and effectively.",
+                "Use individual/group supervision to (a) explore client needs which are beyond your professional capability; and (b) to clarify how to manage referral situations."
+              ],
+              "claims": [],
+              "_visible": true
+            },
+            {
+              "id": "1.3.2",
+              "title": "Make suicidal risk assessments and work with emergency situations",
+              "guidance": [
+                "Identify what constitutes an emergency situation.",
+                "Explore your actual or potential reactions to suicidal clients.",
+                "Discuss strategies and tools for risk assessment and risk management in your agency compared with others in your training group.",
+                "Use supervision to clarify how to prepare for and manage suicidal and other emergency situations.",
+                "Demonstrate (in own client work) ability to manage suicidal risk assessments and emergency situations."
+              ],
+              "claims": [],
+              "_visible": true
+            },
+            {
+              "id": "1.3.3",
+              "title": "Support referral where appropriate",
+              "guidance": [
+                "Work with agency team members and supervisor to identify when and where to refer clients.",
+                "Demonstrate how to work with clients to manage the referral process collaboratively.",
+                "Explore with your agency how the process of assessment may lead to appropriate referral onwards."
+              ],
+              "claims": [],
+              "_visible": true
+            },
+            {
+              "id": "1.3.4",
+              "title": "Monitor own effectiveness and identify issues that require personal work",
+              "guidance": [
+                "Understand the distinction between supervision and personal counselling, and the role of your supervisor and your counsellor.",
+                "Reflect on the relationship between your personal use of counselling and the effectiveness of your practice.",
+                "Record increased critical awareness of the impact of your personal issues on the counselling process."
+              ],
+              "claims": [],
+              "_visible": true
+            }
+          ],
+          "_visible": true
+        }
+      ],
+      "_visible": true
+    },
+    {
+      "id": "2",
+      "learningOutcome": "Working within a counselling relationship",
+      "sections": [
+        {
+          "id": "2.1",
+          "learningOutcome": "Establish and sustain the boundaries of the counselling relationship",
+          "criteria": [
+            {
+              "id": "2.1.1",
+              "title": "Explore the role of the counsellor in different settings and services",
+              "guidance": [
+                "Explore and discuss in relation to different agency settings with reference to (for example) funding, resources, policies, time-limited work and agency focus.",
+                "Discuss how counsellors might operate within multi-disciplinary teams.",
+                "Consider the practical and ethical impact of counselling in settings providing telephone or online counselling"
+              ],
+              "claims": [],
+              "_visible": true
+            },
+            {
+              "id": "2.1.2",
+              "title": "Establish the boundaries of the counselling relationship within specific agency settings",
+              "guidance": [
+                "Establish what you can and cannot offer a client within your particular agency context.",
+                "Include limits of confidentiality, legal requirements, harm to self/others, time/number of sessions, ethical framework and supervision.",
+                "Practise and discuss appropriate skills for establishing the boundaries with your client.",
+                "Show awareness of skills for agreeing both open-ended and timelimited contracts"
+              ],
+              "claims": [],
+              "_visible": true
+            },
+            {
+              "id": "2.1.3",
+              "title": "Sustain the boundaries of the counsellor role",
+              "guidance": [
+                "•  Explore:",
+                "how clients test boundaries.",
+                "how counsellors can cross boundaries.",
+                "the management of boundary changes.",
+                "where power and authority lie in the relationship. •  Consider (for example) relationships, timekeeping, fees, gifts etc.",
+                "•  Use supervision to explore the meaning and implications of changes and challenges to boundary limits."
+              ],
+              "claims": [],
+              "_visible": true
+            },
+            {
+              "id": "2.1.4",
+              "title": "Manage breaks and endings appropriately",
+              "guidance": [
+                "Understand the impact of interruptions and breaks (e.g. holidays, illness, non-attendance of sessions) on the counselling relationship.",
+                "Use training group, supervision and personal therapy to discuss and record your own difficulties associated with endings.",
+                "Identify strategies and interventions to manage interruptions, breaks and endings.",
+                "Explore ending issues in supervision and demonstrate your ability to leave the client ‘safe’.",
+                "Show understanding of ending issues in counselling work – e.g. ending a session or the therapy as a whole."
+              ],
+              "claims": [],
+              "_visible": true
+            }
+          ],
+          "_visible": true
+        },
+        {
+          "id": "2.2",
+          "learningOutcome": "Establish and develop the therapeutic relationship",
+          "criteria": [
+            {
+              "id": "2.2.1",
+              "title": "Explain the nature and significance of the therapeutic relationship",
+              "guidance": [
+                "Discuss the importance of the relationship between counsellor and client within your core theoretical approach.",
+                "Explore how the relationship can enhance or hinder the therapeutic work."
+              ],
+              "claims": [],
+              "_visible": true
+            },
+            {
+              "id": "2.2.2",
+              "title": "Establish and develop the therapeutic relationship",
+              "guidance": [
+                "Relate the way in which you establish the therapeutic relationship to your core theoretical approach.",
+                "Demonstrate in skills practice your ability to establish the therapeutic relationship with clients.",
+                "Demonstrate your ability to develop the therapeutic relationship.",
+                "Show that you are applying your understanding of the development of the counselling relationship."
+              ],
+              "claims": [],
+              "_visible": true
+            },
+            {
+              "id": "2.2.3",
+              "title": "Reflect on the nature and quality of the therapeutic relationship throughout the counselling work",
+              "guidance": [
+                "Discuss the nature and quality of your relationship with clients.",
+                "Link the progress of the relationship to your core theoretical model.",
+                "Explore (for example) subtle/unconscious influences on the therapeutic relationship, e.g. client/ counsellor disinhibition when working via online/telephone.",
+                "Document changes in the relationship."
+              ],
+              "claims": [],
+              "_visible": true
+            },
+            {
+              "id": "2.2.4",
+              "title": "Use the therapeutic relationship to inform and enhance the therapeutic process",
+              "guidance": [
+                "Refer to your core theory so that you can understand how to purposefully use the therapeutic relationship to inform the therapeutic process.",
+                "Provide examples of where you have intentionally used the therapeutic relationship to enhance the therapeutic process."
+              ],
+              "claims": [],
+              "_visible": true
+            },
+            {
+              "id": "2.2.5",
+              "title": "Recognise and respond to difficulties and conflicts in the therapeutic relationship",
+              "guidance": [
+                "Identify and consider the range of difficulties and conflicts that can arise in the counselling relationship.",
+                "Develop strategies and interventions to deal with specific difficulties –",
+                "e.g. late attending, bringing children to sessions, avoiding difficult topics, inappropriate emotions (client’s and counsellor’s), sexual transference, non-payment and disinhibition.",
+                "Respond appropriately using a range of strategies and interventions."
+              ],
+              "claims": [],
+              "_visible": true
+            }
+          ],
+          "_visible": true
+        }
+      ],
+      "_visible": true
+    },
+    {
+      "id": "3",
+      "learningOutcome": "Working with client diversity in counselling work",
+      "sections": [
+        {
+          "id": "3.1",
+          "learningOutcome": "Understand and work with diversity",
+          "criteria": [
+            {
+              "id": "3.1.1",
+              "title": "Explore diversity issues between self and client during the counselling relationship",
+              "guidance": [
+                "Discuss the relationship between developing empathy and understanding client diversity.",
+                "Reflect on diversity issues which impact on the relationship between you and individual clients.",
+                "Demonstrate how you have addressed issues of diversity between yourself and clients during the counselling work."
+              ],
+              "claims": [],
+              "_visible": true
+            },
+            {
+              "id": "3.1.2",
+              "title": "Evaluate how an understanding of diversity can enhance empathy",
+              "guidance": [
+                "Identify and explore diversity issues between yourself and others (e.g.",
+                "between yourself and your tutor/ supervisor/other group members).",
+                "Reflect on your own responses/reactions to others –e.g. group members, clients etc.",
+                "Explore how a deeper understanding of diversity can enhance empathy."
+              ],
+              "claims": [],
+              "_visible": true
+            },
+            {
+              "id": "3.1.3",
+              "title": "Demonstrate sensitivity to diversity issues with individual clients",
+              "guidance": [
+                "Identify key diversity issues that you have encountered with clients or peers – and explore your responses to these.",
+                "Discuss how diversity issues may help or hinder counselling work.",
+                "Demonstrate developing sensitivity to diversity with a range of clients and specific client groups."
+              ],
+              "claims": [],
+              "_visible": true
+            }
+          ],
+          "_visible": true
+        },
+        {
+          "id": "3.2",
+          "learningOutcome": "Challenge own issues, fears and prejudices",
+          "criteria": [
+            {
+              "id": "3.2.1",
+              "title": "Explore and challenge own beliefs and values",
+              "guidance": [
+                "Reflect on your experiences of identifying types of people/issues that you find very difficult to understand and/or accept.",
+                "Explore your own beliefs, where these come from and how valid they still are."
+              ],
+              "claims": [],
+              "_visible": true
+            },
+            {
+              "id": "3.2.2",
+              "title": "Explore and challenge own issues, fears and prejudices concerning working with client diversity",
+              "guidance": [
+                "Recognise and reflect on types of people and issues that touch your prejudices and fears.",
+                "Reflect on the reasons for your responses.",
+                "Challenge your own blocks and prejudices in work with individual clients."
+              ],
+              "claims": [],
+              "_visible": true
+            }
+          ],
+          "_visible": true
+        },
+        {
+          "id": "3.3",
+          "learningOutcome": "Understand how diversity issues affect client access to counselling",
+          "criteria": [
+            {
+              "id": "3.3.1",
+              "title": "Reflect on diversity issues which impact on clients accessing counselling within agency settings",
+              "guidance": [
+                "Identify a range of issues which may prevent clients accessing inperson and online/telephone counselling – e.g., stairs, finance, waiting lists, language, culture, access to technology, safe spaces and digital skills etc.",
+                "Consider impact of local and national policy on mental health service provision.",
+                "Consider what might help to widen access to counselling in your agency."
+              ],
+              "claims": [],
+              "_visible": true
+            },
+            {
+              "id": "3.3.2",
+              "title": "Reflect on issues relating to working with a third-party present",
+              "guidance": [
+                "Identify occasions when working with another presence in the room would be appropriate (e.g. translator, signer, carer, dog).",
+                "Consider the impact of clients engaging in online/telephone counselling from their own spaces where other people may be present.",
+                "Explore the difficulties that could be present in these circumstances."
+              ],
+              "claims": [],
+              "_visible": true
+            }
+          ],
+          "_visible": true
+        }
+      ],
+      "_visible": true
+    },
+    {
+      "id": "4",
+      "learningOutcome": "Working within a user-centred approach to counselling",
+      "sections": [
+        {
+          "id": "4.1",
+          "learningOutcome": "Work within a user-centred agreement for the counselling work",
+          "criteria": [
+            {
+              "id": "4.1.1",
+              "title": "Enable clients to explore their attitudes to and expectations of counselling within specific agency settings",
+              "guidance": [
+                "Explore how to give your client the opportunity to discuss their understanding of counselling and what they require from it.",
+                "Gain an understanding of clients’ expectations and preferences for counselling at the outset of the work.",
+                "Identify what you can offer within the limitations of your agency.",
+                "Practise (in class and in your agency) exploring and clarifying client expectations."
+              ],
+              "claims": [],
+              "_visible": true
+            },
+            {
+              "id": "4.1.2",
+              "title": "Negotiate a shared agreement for the counselling work",
+              "guidance": [
+                "Reflect on what ‘negotiate’ and ‘shared agreement’ for the counselling work means.",
+                "Understand the difference between business contract/agency policies (etc.) and a therapeutic agreement for the counselling work.",
+                "Demonstrate your ability to negotiate a shared agreement for the counselling work with individual clients.",
+                "Use information from initial client assessment to inform the shared agreement."
+              ],
+              "claims": [],
+              "_visible": true
+            },
+            {
+              "id": "4.1.3",
+              "title": "Regularly review the working agreement with clients",
+              "guidance": [
+                "Discuss in your training group the reasons for regularly reviewing the working agreement with your client.",
+                "Demonstrate an understanding of the changing needs of your clients and show your ability to be flexible and responsive to their needs.",
+                "Acknowledge changes that have occurred for the client - e.g.",
+                "emotional, practical, relational, behavioural, spiritual.",
+                "Ensure client participation when reviewing and renegotiating the working agreement."
+              ],
+              "claims": [],
+              "_visible": true
+            },
+            {
+              "id": "4.1.4",
+              "title": "Reflect on the different ways of offering counselling",
+              "guidance": [
+                "Gain an understanding of the range of ways in which counselling can be offered, e.g. in-person, online, telephone, text, blended work.",
+                "Research and consider the benefits and challenges of counselling using different media.",
+                "Practice using a range of mediums through facilitated skills practice sessions in class.",
+                "Reflect on the ways in which counselling is offered within your agency."
+              ],
+              "claims": [],
+              "_visible": true
+            }
+          ],
+          "_visible": true
+        },
+        {
+          "id": "4.2",
+          "learningOutcome": "Maintain a user-centred focus throughout the counselling work",
+          "criteria": [
+            {
+              "id": "4.2.1",
+              "title": "Enable the client to identify, prioritise and focus on their agenda",
+              "guidance": [
+                "Identify and explore your client’s spoken and unspoken agenda, both within the session and during the counselling process.",
+                "Explore the ways in which both counsellors and clients may try to avoid painful agendas."
+              ],
+              "claims": [],
+              "_visible": true
+            },
+            {
+              "id": "4.2.2",
+              "title": "Use regular reviews and clinical supervision to maintain the focus on the client’s agenda throughout the counselling work",
+              "guidance": [
+                "•  Record and develop good practice of regular reviews and use of supervision to help maintain the focus on your client’s agenda (both spoken and unspoken) throughout the relationship."
+              ],
+              "claims": [],
+              "_visible": true
+            },
+            {
+              "id": "4.2.3",
+              "title": "Enable clients to explore their unspoken agendas",
+              "guidance": [
+                "Explore (in the training group or elsewhere) your own experiences of feeling a sense of emotional warmth and safety with another person.",
+                "Develop your capacity (both as a person and a professional) to relate appropriately to your client –i.e. with congruence, emotional warmth and safety.",
+                "Develop an openness to listen to your client’s unspoken agenda.",
+                "Develop your ability to stay with your client’s difficult feelings.",
+                "Experiment (in group-work and counselling practice sessions) with different ways of communicating emotional warmth and safety."
+              ],
+              "claims": [],
+              "_visible": true
+            }
+          ],
+          "_visible": true
+        }
+      ],
+      "_visible": true
+    },
+    {
+      "id": "5",
+      "learningOutcome": "Working with self-awareness in the counselling process",
+      "sections": [
+        {
+          "id": "5.1",
+          "learningOutcome": "Use counselling theory to understand own self",
+          "criteria": [
+            {
+              "id": "5.1.1",
+              "title": "Explore the nature and structure of own self",
+              "guidance": [
+                "Refer to your core theoretical model(s) to explore the concept of ‘Self’.",
+                "Refer to your core theoretical model(s) to explore the explicit and implicit aspects of own ‘Self’.",
+                "Develop your personal understanding through your own therapeutic counselling/personal development workshops/group process work."
+              ],
+              "claims": [],
+              "_visible": true
+            },
+            {
+              "id": "5.1.2",
+              "title": "Explore own recent and formative personal history",
+              "guidance": [
+                "Use your core theoretical approach to inform your understanding of your own past and recent personal history.",
+                "Develop your understanding through personal therapeutic counselling and personal development workshops."
+              ],
+              "claims": [],
+              "_visible": true
+            },
+            {
+              "id": "5.1.3",
+              "title": "Explore own patterns of relating",
+              "guidance": [
+                "With reference to your core theoretical approach explore your own explicit and implicit patterns of relating.",
+                "Show your increased understanding of personal patterns of relating –",
+                "e.g. by reflecting on your personal counselling, personal development sessions and your relationships within the training group."
+              ],
+              "claims": [],
+              "_visible": true
+            }
+          ],
+          "_visible": true
+        },
+        {
+          "id": "5.2",
+          "learningOutcome": "Work on personal issues that resonate with client work",
+          "criteria": [
+            {
+              "id": "5.2.1",
+              "title": "Work on own emotional difficulties and internal conflicts that could impact on client work",
+              "guidance": [
+                "Identify – e.g. by supervision or therapeutic counselling – personal emotional difficulties and internal conflicts that could have an impact on your client work either negatively or positively.",
+                "Reflect on insights and changes which emerge from personal therapeutic counselling and personal development workshops – and show awareness of the relevance of these issues to own client work."
+              ],
+              "claims": [],
+              "_visible": true
+            },
+            {
+              "id": "5.2.2",
+              "title": "Work on own recent and past life events that could impact on client work",
+              "guidance": [
+                "Identify formative personal life events that could have an impact on your client work either negatively or positively.",
+                "Use supervision/personal therapeutic counselling to reflect on and understand how these events resonate with client work.",
+                "Show how increased understanding of own recent and past life events is relevant to own client work."
+              ],
+              "claims": [],
+              "_visible": true
+            },
+            {
+              "id": "5.2.3",
+              "title": "Work on own relationship difficulties that could impact on client work",
+              "guidance": [
+                "Use personal therapeutic counselling and supervision to help identify personal relationship difficulties that resonate with client work.",
+                "Identify explicit and implicit relationship difficulties and document how they could impact on your client work.",
+                "Show how increased understanding of your own relationship difficulties is relevant to own client work."
+              ],
+              "claims": [],
+              "_visible": true
+            }
+          ],
+          "_visible": true
+        },
+        {
+          "id": "5.3",
+          "learningOutcome": "Use self-awareness to enhance counselling work",
+          "criteria": [
+            {
+              "id": "5.3.1",
+              "title": "Reflect on the importance of self-awareness in counselling work",
+              "guidance": [
+                "Reflect on role of ‘therapist factors’ and therapist’s self-awareness in client work.",
+                "Evaluate own capacity to challenge and deepen understanding of own self.",
+                "Reflect on and give examples of how clients evoke ‘shadow’ aspects of self."
+              ],
+              "claims": [],
+              "_visible": true
+            },
+            {
+              "id": "5.3.2",
+              "title": "Use awareness of self during counselling sessions to enhance the therapeutic process",
+              "guidance": [
+                "Identify examples of the use of self-awareness in your client-work.",
+                "Explore examples of when you enhanced the therapeutic process by intentionally applying awareness of self.",
+                "Use individual and group training supervision to reflect on your use of self-awareness."
+              ],
+              "claims": [],
+              "_visible": true
+            },
+            {
+              "id": "5.3.3",
+              "title": "Use clinical supervision to develop awareness of own implicit processes",
+              "guidance": [
+                "Develop understanding of implicit processes within the training group by discussion in group training supervision.",
+                "Use own supervision to explore own implicit processes evoked by client-work."
+              ],
+              "claims": [],
+              "_visible": true
+            }
+          ],
+          "_visible": true
+        }
+      ],
+      "_visible": true
+    },
+    {
+      "id": "6",
+      "learningOutcome": "Working within a coherent framework of counselling theory and skills",
+      "sections": [
+        {
+          "id": "6.1",
+          "learningOutcome": "Use a coherent framework of theory and skills to inform and enhance counselling work",
+          "criteria": [
+            {
+              "id": "6.1.1",
+              "title": "Use theory of the self, personal history and relationships in client work",
+              "guidance": [
+                "Explore philosophical ideas about the nature of human behaviour and change.",
+                "Study theories of self, personal history and relationships as explained by your core theoretical model.",
+                "Understand how a thorough understanding of your model can inform your work with clients.",
+                "Demonstrate how this understanding of self, personal history and relationships has informed work with individual clients."
+              ],
+              "claims": [],
+              "_visible": true
+            },
+            {
+              "id": "6.1.2",
+              "title": "Use theory of therapeutic change to inform client work",
+              "guidance": [
+                "Understand (within your core theoretical model) what therapeutic change means.",
+                "Apply your understanding of therapeutic change to inform and enhance the effectiveness of your client work.",
+                "Demonstrate how this understanding of therapeutic change has informed work with individual clients."
+              ],
+              "claims": [],
+              "_visible": true
+            },
+            {
+              "id": "6.1.3",
+              "title": "Use research findings to enhance understanding of client work",
+              "guidance": [
+                "Read contemporary research findings associated with your core theoretical approach and consider the application of these to your client work.",
+                "Document your reading, seminars, supervision and reflections on client work."
+              ],
+              "claims": [],
+              "_visible": true
+            },
+            {
+              "id": "6.1.4",
+              "title": "Use counselling skills and techniques associated with own theoretical approach",
+              "guidance": [
+                "Study and practise skills and techniques associated with your theoretical model.",
+                "Ensure that you are thoroughly grounded in your core model(s) and can apply the relevant techniques and skills to further enhance your client work.",
+                "Practise and get feedback on your use of skills in counselling practice sessions.",
+                "Demonstrate appropriate skills and techniques in work with individual clients."
+              ],
+              "claims": [],
+              "_visible": true
+            }
+          ],
+          "_visible": true
+        },
+        {
+          "id": "6.2",
+          "learningOutcome": "Understand and work with client problems at different service levels",
+          "criteria": [
+            {
+              "id": "6.2.1",
+              "title": "Understand and work with common life problems and obstacles to well-being",
+              "guidance": [
+                "Study and discuss the CPCAB model of helping work and counselling practice.",
+                "Explore a range of common life events/transitions: i.e. events which happen to people such as loss and bereavement, relationship breakdowns, traumas, life stage changes.",
+                "Discuss obstacles to mental and emotional well-being.",
+                "Explore how your core model conceptualises common life problems and obstacles to well-being.",
+                "Demonstrate ability to work (with individual clients) with common life problems and obstacles to well-being."
+              ],
+              "claims": [],
+              "_visible": true
+            },
+            {
+              "id": "6.2.2",
+              "title": "Understand and work with common mental health problems",
+              "guidance": [
+                "Understand what is meant by common mental health problems.",
+                "Distinguish between CPCAB Service Level A and B1 issues (see CPCAB model of helping work and counselling practice on the CPCAB website).",
+                "Explore how your core model conceptualises common mental health problems.",
+                "Demonstrate understanding of client assessment within your core model.",
+                "Understand the role of resilience and its link with mental well-being.",
+                "Demonstrate ability to work with clients with mental health issues at Service Level B1."
+              ],
+              "claims": [],
+              "_visible": true
+            },
+            {
+              "id": "6.2.3",
+              "title": "Use clinical supervision to identify clients with severe mental health problems and support the referral process",
+              "guidance": [
+                "Become familiar with signs and symptoms of severe and complex mental health problems.",
+                "Show an awareness of how your core model conceptualises severe mental health problems.",
+                "Clarify with your supervisor how to utilise clinical supervision to identify and refer clients requiring this level of help and support.",
+                "Demonstrate how you have used supervision to support you in this process."
+              ],
+              "claims": [],
+              "_visible": true
+            },
+            {
+              "id": "6.2.4",
+              "title": "Reflect on different approaches to understanding mental health",
+              "guidance": [
+                "Distinguish between the different approaches to understanding mental health – e.g. consider the medical model versus your core theoretical approach.",
+                "Have an understanding of the medical and non-medical approaches to mental health problems.",
+                "Explore the impact of medical interventions for mental health upon the therapeutic process."
+              ],
+              "claims": [],
+              "_visible": true
+            }
+          ],
+          "_visible": true
+        }
+      ],
+      "_visible": true
+    },
+    {
+      "id": "7",
+      "learningOutcome": "Working self reflectively as a counsellor",
+      "sections": [
+        {
+          "id": "7.1",
+          "learningOutcome": "Manage own development as a counsellor",
+          "criteria": [
+            {
+              "id": "7.1.1",
+              "title": "Evaluate own progress, identify needs and plan learning",
+              "guidance": [
+                "Reflect on your own progress on the course and your personal and professional development.",
+                "Identify areas to work on.",
+                "Regularly document your progress and plan how to address your learning needs.",
+                "Use self- reviews, learning review, tutorial reports and peer feedback to evaluate your progress."
+              ],
+              "claims": [],
+              "_visible": true
+            },
+            {
+              "id": "7.1.2",
+              "title": "Assist other counselling trainees to identify their progress and learning needs",
+              "guidance": [
+                "Establish how to give constructive feedback to others.",
+                "Reflect on any difficulties you have in giving feedback to others.",
+                "Use feedback skills to help your peers to identify their progress and learning needs."
+              ],
+              "claims": [],
+              "_visible": true
+            }
+          ],
+          "_visible": true
+        },
+        {
+          "id": "7.2",
+          "learningOutcome": "Reflect on and evaluate own counselling work within agency settings",
+          "criteria": [
+            {
+              "id": "7.2.1",
+              "title": "Reflect on and evaluate the effectiveness of own counselling work in agency settings",
+              "guidance": [
+                "Reflect on the importance of evaluating own counselling work.",
+                "Discuss ways of evaluating the effectiveness of your counselling practice.",
+                "Understand how to use supervision and agency practice manager to evaluate your own counselling work.",
+                "Utilise therapeutic outcomes measures and client feedback to help evaluate your counselling work."
+              ],
+              "claims": [],
+              "_visible": true
+            },
+            {
+              "id": "7.2.2",
+              "title": "Prepare for and use clinical supervision effectively",
+              "guidance": [
+                "Identify what you require from supervision.",
+                "Prepare client notes (in keeping with your agency’s policy) to make effective use of supervision.",
+                "Demonstrate how you have used supervision to enhance client work.",
+                "Explore a range of theoretical models of supervision.",
+                "Discuss how you will meet the requirements for supervision from your ethical framework."
+              ],
+              "claims": [],
+              "_visible": true
+            },
+            {
+              "id": "7.2.3",
+              "title": "Investigate the use of evaluative tools in counselling work",
+              "guidance": [
+                "Research tools for monitoring client outcomes – e.g. Clinical Outcomes for Routine Evaluation: www.coreims.co.uk.",
+                "Discuss the reasons for (and value of) evaluative tools – e.g. funding implications.",
+                "Provide and comment on an example (from your own agency if possible) of a tool designed for monitoring client outcomes."
+              ],
+              "claims": [],
+              "_visible": true
+            }
+          ],
+          "_visible": true
+        }
+      ],
+      "_visible": true
+    }
+  ],
+  "sections": []
+}

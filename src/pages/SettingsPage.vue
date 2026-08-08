@@ -77,6 +77,9 @@
                 <div>Course units</div>
                 <div><strong>{{ courseUnits }}</strong></div>
               </div>
+              <div class="col-12 q-mt-md">
+                <ButtonWithConfirmation label="Clear model and start over" confirm-message="This will clear your current course model and all associated data. Are you sure?" @confirm="resetModel" />
+              </div>
             </div>
           </q-card-section>
         </q-card>
@@ -90,6 +93,8 @@ import { computed, ref, watch } from 'vue';
 import { Notify } from 'quasar';
 import GoogleDriveConnector from '@/components/GoogleDriveConnector.vue';
 import type { PlacementSession, SupervisionNote, Agency, Client, GlossaryEntry, CourseSchema, Claim } from '@/types';
+import { useCourseStore } from '@/composables/useCourseStore';
+import ButtonWithConfirmation from '@/components/ButtonWithConfirmation.vue';
 
 const STORAGE_SESSIONS = 'placement-sessions';
 const STORAGE_SUPERVISION = 'placement-supervision';
@@ -328,8 +333,15 @@ function handleDriveFileLoaded(payload: unknown) {
  window.location.reload();
 }
 
+const store = useCourseStore();
 const sessionCount = computed(() => getCurrentState().sessions.length);
 const supervisionCount = computed(() => getCurrentState().supervisionNotes.length);
 const glossaryCount = computed(() => getCurrentState().glossaryEntries.length);
 const courseUnits = computed(() => getCurrentState().course?.units.length ?? 0);
+
+function resetModel() {
+  store.continueWithEmptyModel();
+  store.welcomeDialogVisible.value = true;
+  Notify.create({ type: 'positive', message: 'Model cleared. Choose a criteria set to get started.' });
+}
 </script>

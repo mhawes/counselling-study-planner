@@ -33,9 +33,6 @@
               <div class="col-12 col-sm-6 col-md-3">
                 <q-input v-model="course.courseYear" label="Course Year" dense placeholder="YYYY-YYYY" />
               </div>
-              <div class="col-12 col-sm-6 col-md-3">
-                <q-input v-model="searchQuery" label="Search criteria" dense clearable prepend-icon="search" />
-              </div>
             </div>
           </q-card-section>
           <q-separator />
@@ -72,7 +69,45 @@
           </q-card-section>
         </q-card>
 
-        <div v-if="filteredUnits.length === 0" class="text-grey text-center q-pa-md">
+    <q-card class="q-mb-md">
+      <q-card-section>
+        <div class="text-subtitle2 q-mb-sm">Filter criteria</div>
+        <div class="row q-gutter-sm items-center">
+          <div class="col-12 col-sm-6 col-md-3">
+            <q-input v-model="searchQuery" label="Search criteria" dense clearable prepend-icon="search" />
+          </div>
+          <div class="col-12 col-sm-6 col-md-3">
+            <q-select
+              v-model="selectedUnitIds"
+              :options="unitOptions"
+              label="Filter by unit"
+              dense
+              multiple
+              use-chips
+              clearable
+              emit-value
+              map-options
+            />
+          </div>
+          <div class="col-12 col-sm-6 col-md-3">
+            <q-select
+              v-model="selectedWorkEvidence"
+              :options="workEvidenceOptions"
+              label="Filter by work / evidence"
+              dense
+              clearable
+              emit-value
+              map-options
+            />
+          </div>
+          <div class="col-12 col-sm-6 col-md-3">
+            <q-toggle v-model="showIncompleteOnly" label="Show incomplete only" dense />
+          </div>
+        </div>
+      </q-card-section>
+    </q-card>
+
+    <div v-if="filteredUnits.length === 0" class="text-grey text-center q-pa-md">
           No criteria match your search.
         </div>
 
@@ -96,7 +131,7 @@
                   <q-banner :color="unitSourceCount(unit, source) >= (course.rules?.perType?.counts?.[source] ?? 0) ? 'positive' : 'grey-3'" class="q-pa-sm">
                     <div class="text-body2">{{ source }}</div>
                     <q-chip :color="unitSourceCount(unit, source) >= (course.rules?.perType?.counts?.[source] ?? 0) ? 'positive' : 'warning'" text-color="white">
-                      {{ unitSourceCount(unit, source) }} / {{ course.rules?.perType?.counts?.[source] ?? 0 }}
+                      {{ unitSourceCount(unit, source) }} / {{ course.rules?.perType?.counts?.[source] ?? 0 }} required
                     </q-chip>
                   </q-banner>
                 </div>
@@ -113,7 +148,7 @@
                       <q-banner :color="sectionSourceCount(section, source) >= (course.rules?.perType?.counts?.[source] ?? 0) ? 'positive' : 'grey-3'" class="q-pa-sm">
                         <div class="text-body2">{{ source }}</div>
                         <q-chip :color="sectionSourceCount(section, source) >= (course.rules?.perType?.counts?.[source] ?? 0) ? 'positive' : 'warning'" text-color="white">
-                          {{ sectionSourceCount(section, source) }} / {{ course.rules?.perType?.counts?.[source] ?? 0 }}
+                          {{ sectionSourceCount(section, source) }} / {{ course.rules?.perType?.counts?.[source] ?? 0 }} required
                         </q-chip>
                       </q-banner>
                     </div>
@@ -163,7 +198,7 @@
                           <q-td :props="props" align="center">
                             <div class="row items-center justify-center">
                               <q-btn dense flat icon="edit" color="primary" @click="openClaimDialog(unit.id, section.id, criterion, props.row)" />
-                              <q-btn dense flat icon="delete" color="negative" @click="removeClaim(unit.id, section.id, criterion.id, props.row.id)" />
+                              <ButtonWithConfirmation dense flat icon="delete" color="negative" confirm-message="Remove this claim?" @confirm="removeClaim(unit.id, section.id, criterion.id, props.row.id)" />
                             </div>
                           </q-td>
                         </template>
@@ -346,6 +381,7 @@ import type { Claim, ClaimSource, CourseSchema, Unit } from '@/types';
 import { useCourseStore } from '@/composables/useCourseStore';
 import { uuid } from '@/utils/uuid';
 import FireworksDisplay from '@/components/FireworksDisplay.vue';
+import ButtonWithConfirmation from '@/components/ButtonWithConfirmation.vue';
 
 const { course } = useCourseStore();
 
@@ -418,6 +454,25 @@ const isCourseComplete = computed(() => {
 const submitWorkDialogVisible = ref(false);
 const submittedWorkDialogVisible = ref(false);
 const searchQuery = ref('');
+const selectedUnitIds = ref<string[]>([]);
+const selectedWorkEvidence = ref<string | null>(null);
+const showIncompleteOnly = ref(false);
+
+const unitOptions = computed(() =>
+  course.units.map((unit) => ({
+    label: `Unit ${unit.id}: ${unit.learningOutcome}`,
+    value: unit.id
+  }))
+);
+
+const workEvidenceOptions = computed(() => {
+  const groups = submittedWorkGroups.value;
+  return groups.map((group) => ({
+    label: group.evidence,
+    value: group.evidence
+  }));
+});
+
 const submitWorkContext = reactive({
   evidence: '',
   claimDate: null as string | null,
@@ -539,17 +594,44 @@ function visibleCriteriaForSection(section: { learningOutcome: string; criteria:
 const filteredUnits = computed(() => {
   const query = searchQuery.value.trim().toLowerCase();
 
-  if (!query) {
-    return course.units;
-  }
-
   return course.units.reduce<Unit[]>((accumulator, unit) => {
+    if (selectedUnitIds.value.length > 0 && !selectedUnitIds.value.includes(unit.id)) {
+      return accumulator;
+    }
+
     const matchingSections = unit.sections
-      .filter((section) => sectionMatchesQuery(section, query))
-      .map((section) => ({
-        ...section,
-        criteria: visibleCriteriaForSection(section, query)
-      }));
+      .filter((section) => {
+        if (query && !sectionMatchesQuery(section, query)) {
+          return false;
+        }
+
+        return true;
+      })
+      .map((section) => {
+        let criteria = section.criteria;
+
+        if (showIncompleteOnly.value) {
+          criteria = criteria.filter((criterion) =>
+            (criterion.claims?.length ?? 0) < perCriterionCount.value
+          );
+        }
+
+        if (selectedWorkEvidence.value) {
+          criteria = criteria.filter((criterion) =>
+            (criterion.claims?.length ?? 0) > 0 && criterion.claims.some((claim) => claim.evidence === selectedWorkEvidence.value)
+          );
+        }
+
+        if (query) {
+          criteria = criteria.filter((criterion) => criterionMatchesQuery(criterion, query));
+        }
+
+        return {
+          ...section,
+          criteria
+        };
+      })
+      .filter((section) => section.criteria.length > 0);
 
     if (matchingSections.length > 0) {
       accumulator.push({
@@ -690,7 +772,12 @@ function sectionSourceCount(section: Unit['sections'][0], source: ClaimSource) {
 function sectionComplete(section: Unit['sections'][0]) {
   const perType = course.rules?.perType;
   const sources = requiredSources.value ?? [];
-  return sources.every((source) => sectionSourceCount(section, source) >= (course.rules?.perType?.counts?.[source] ?? 0));
+  if (!perType || perType.scope === 'section') {
+    return sources.every((source) => sectionSourceCount(section, source) >= (course.rules?.perType?.counts?.[source] ?? 0));
+  }
+
+  // perType.scope === 'unit'
+  return section.criteria.every((criterion) => (criterion.claims?.length ?? 0) >= perCriterionCount.value);
 }
 
 function unitComplete(unit: Unit) {

@@ -12,7 +12,6 @@
           v-model="selectedDefaultCourseId"
           :options="defaultCourseOptions"
           type="radio"
-          inline
         />
         <div class="row q-gutter-md q-mt-md">
           <div class="col-12 col-md-6">
@@ -64,6 +63,7 @@ import { ref } from 'vue';
 import { Notify } from 'quasar';
 import type { CourseSchema } from '@/types';
 import { defaultCourse } from '@/data/defaultCourse';
+import { CbcabLevel4_2025_2027 } from '@/data/CbcabLevel4_2025_2027';
 import { useCourseStore } from '@/composables/useCourseStore';
 
 const store = useCourseStore();
@@ -75,30 +75,10 @@ const fileInput = ref<HTMLInputElement | null>(null);
 
 const defaultCourseSets = [
   {
-    id: 'level4-2025-2027',
-    label: 'CPCAB Level 4 2025-2027',
+    id: 'cbcab-level4-2025-2027',
+    label: 'CBCAB Level 4 Diploma 2025-2027',
     course: {
-      ...structuredClone(defaultCourse),
-      courseTitle: 'CPCAB Level 4 Counselling Portfolio',
-      courseYear: '2025-2027'
-    }
-  },
-  {
-    id: 'level3-2026',
-    label: 'CPCAB Level 3 2026',
-    course: {
-      ...structuredClone(defaultCourse),
-      courseTitle: 'CPCAB Level 3 Counselling Portfolio',
-      courseYear: '2026-2027'
-    }
-  },
-  {
-    id: 'level2-2026',
-    label: 'CPCAB Level 2 2026',
-    course: {
-      ...structuredClone(defaultCourse),
-      courseTitle: 'CPCAB Level 2 Counselling Portfolio',
-      courseYear: '2026-2027'
+      ...structuredClone(CbcabLevel4_2025_2027),
     }
   }
 ] as const;
