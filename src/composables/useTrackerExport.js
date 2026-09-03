@@ -1,10 +1,14 @@
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 const STORAGE_SESSIONS = 'placement-sessions';
 const STORAGE_SUPERVISION = 'placement-supervision';
 const STORAGE_AGENCIES = 'placement-agencies';
 const STORAGE_CLIENTS = 'placement-clients';
 const STORAGE_GLOSSARY = 'glossary-entries';
 const STORAGE_COURSE = 'course-criteria-data';
+export const exportStateRevision = ref(0);
+export function notifyExportStateChanged() {
+    exportStateRevision.value += 1;
+}
 function loadStorage(key, fallback) {
     try {
         const raw = localStorage.getItem(key);
@@ -23,8 +27,11 @@ export function getExportState() {
     const course = loadStorage(STORAGE_COURSE, null);
     return { sessions, supervisionNotes, agencies, clients, glossaryEntries, course };
 }
-export const exportJson = computed(() => JSON.stringify({
-    exportedAt: new Date().toISOString(),
-    ...getExportState()
-}, null, 2));
+export const exportJson = computed(() => {
+    exportStateRevision.value;
+    return JSON.stringify({
+        exportedAt: new Date().toISOString(),
+        ...getExportState()
+    }, null, 2);
+});
 //# sourceMappingURL=useTrackerExport.js.map

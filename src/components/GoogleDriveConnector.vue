@@ -57,6 +57,7 @@
 <script setup lang="ts">
 import { computed, defineEmits, defineProps, ref, defineExpose } from 'vue';
 import { Notify } from 'quasar';
+import { recordAutosave } from '@/composables/useGoogleDrive2';
 
 interface GoogleDriveFile {
   id: string;
@@ -284,6 +285,7 @@ async function saveStateToDrive() {
 
     const result = await response.json();
     googleDriveStatus.value = `Saved to Drive as ${result.name}`;
+    recordAutosave(result.name);
     Notify.create({ type: 'positive', message: 'Tracker state saved to Google Drive.' });
     emit('saved', `Saved to Drive as ${result.name}`);
   } catch (error) {

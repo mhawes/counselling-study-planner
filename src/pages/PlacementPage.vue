@@ -610,6 +610,7 @@ import type {
 import { uuid } from "@/utils/uuid";
 import FireworksDisplay from '@/components/FireworksDisplay.vue';
 import ButtonWithConfirmation from '@/components/ButtonWithConfirmation.vue';
+import { notifyExportStateChanged } from '@/composables/useTrackerExport';
 
 const STORAGE_SESSIONS = "placement-sessions";
 const STORAGE_SUPERVISION = "placement-supervision";
@@ -678,6 +679,7 @@ watch(
   sessions,
   (value) => {
     localStorage.setItem(STORAGE_SESSIONS, JSON.stringify(value));
+    notifyExportStateChanged();
   },
   { deep: true },
 );
@@ -686,6 +688,7 @@ watch(
   supervisionNotes,
   (value) => {
     localStorage.setItem(STORAGE_SUPERVISION, JSON.stringify(value));
+    notifyExportStateChanged();
   },
   { deep: true },
 );
@@ -694,6 +697,7 @@ watch(
   agencies,
   (value) => {
     localStorage.setItem(STORAGE_AGENCIES, JSON.stringify(value));
+    notifyExportStateChanged();
   },
   { deep: true },
 );
@@ -702,6 +706,7 @@ watch(
   clients,
   (value) => {
     localStorage.setItem(STORAGE_CLIENTS, JSON.stringify(value));
+    notifyExportStateChanged();
   },
   { deep: true },
 );

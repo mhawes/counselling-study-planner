@@ -7,6 +7,11 @@ const STORAGE_AGENCIES = 'placement-agencies';
 const STORAGE_CLIENTS = 'placement-clients';
 const STORAGE_GLOSSARY = 'glossary-entries';
 const STORAGE_COURSE = 'course-criteria-data';
+export const exportStateRevision = ref(0);
+
+export function notifyExportStateChanged() {
+  exportStateRevision.value += 1;
+}
 
 function loadStorage<T>(key: string, fallback: T): T {
   try {
@@ -28,7 +33,10 @@ export function getExportState() {
   return { sessions, supervisionNotes, agencies, clients, glossaryEntries, course };
 }
 
-export const exportJson = computed(() => JSON.stringify({
-  exportedAt: new Date().toISOString(),
-  ...getExportState()
-}, null, 2));
+export const exportJson = computed(() => {
+  exportStateRevision.value;
+  return JSON.stringify({
+    exportedAt: new Date().toISOString(),
+    ...getExportState()
+  }, null, 2);
+});

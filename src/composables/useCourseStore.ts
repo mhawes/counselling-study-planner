@@ -1,5 +1,6 @@
 import { reactive, ref, watch } from 'vue';
 import type { CourseSchema } from '@/types';
+import { notifyExportStateChanged } from '@/composables/useTrackerExport';
 
 const STORAGE_KEY = 'course-criteria-data';
 
@@ -86,6 +87,7 @@ const course = reactive<CourseSchema>(storedCourse ?? emptyCourse());
 
 function saveCourse() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(course));
+  notifyExportStateChanged();
   hasStoredCourse.value = !isCourseEmpty(course);
 }
 

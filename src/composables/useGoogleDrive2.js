@@ -1,7 +1,16 @@
 import { ref } from 'vue';
 import { Notify } from 'quasar';
 const STORAGE_LAST_AUTOSAVE = 'google-drive-last-autosave';
+const STORAGE_AUTOSAVE = 'google-drive-autosave';
 const GOOGLE_CLIENT_ID = '843769116026-r3e0ati85aecv5v505318oc67olakm8r.apps.googleusercontent.com';
+function isAutosaveInfo(value) {
+    if (!value || typeof value !== 'object')
+        return false;
+    const candidate = value;
+    return (typeof candidate.filename === 'string' &&
+        typeof candidate.timestamp === 'string' &&
+        !Number.isNaN(Date.parse(candidate.timestamp)));
+}
 function loadStorage(key, fallback) {
     try {
         const raw = localStorage.getItem(key);
@@ -11,28 +20,22 @@ function loadStorage(key, fallback) {
         return fallback;
     }
 }
+const autosaveEnabled = ref(loadStorage(STORAGE_AUTOSAVE, false));
+const storedAutosave = loadStorage(STORAGE_LAST_AUTOSAVE, null);
+const lastAutosave = ref(isAutosaveInfo(storedAutosave) ? storedAutosave : null);
+export function recordAutosave(filename) {
+    const payload = { filename, timestamp: new Date().toISOString() };
+    lastAutosave.value = payload;
+    localStorage.setItem(STORAGE_LAST_AUTOSAVE, JSON.stringify(payload));
+}
 export function useGoogleDrive2() {
     const googleClientId = ref(GOOGLE_CLIENT_ID);
     const googleAccessToken = ref('');
     const googleDriveStatus = ref('Not connected');
     const googleTokenClient = ref(null);
     const googleScriptLoaded = ref(false);
-    let _initialLastAutosave = null;
-    try {
-        const raw = localStorage.getItem(STORAGE_LAST_AUTOSAVE);
-        _initialLastAutosave = raw ? JSON.parse(raw) : null;
-    }
-    catch {
-        _initialLastAutosave = null;
-    }
-    const lastAutosave = ref(_initialLastAutosave);
     function persistLastAutosave(filename) {
-        const payload = { filename, timestamp: new Date().toISOString() };
-        lastAutosave.value = payload;
-        try {
-            localStorage.setItem(STORAGE_LAST_AUTOSAVE, JSON.stringify(payload));
-        }
-        catch { }
+        recordAutosave(filename);
     }
     function initGoogleTokenClient() {
         const google = window.google;
@@ -166,6 +169,44 @@ export function useGoogleDrive2() {
         }
         if (folderId)
             metadata.parents = [folderId];
+        let existingFileId = null;
+        try {
+            const parentClause = folderId ? `'${folderId}' in parents and ` : '';
+            const fileQuery = encodeURIComponent(`${parentClause}name='${metadata.name}' and mimeType='application/json' and trashed=false`);
+            const existingResponse = await fetch(`https://www.googleapis.com/drive/v3/files?fields=files(id,name)&q=${fileQuery}`, { headers: { Authorization: `Bearer ${googleAccessToken.value}` } });
+            if (existingResponse.ok) {
+                const existingPayload = await existingResponse.json();
+                existingFileId = existingPayload.files?.[0]?.id ?? null;
+            }
+        }
+        catch (error) {
+            console.warn('Existing autosave lookup failed', error);
+        }
+        if (existingFileId) {
+            try {
+                const response = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${existingFileId}?uploadType=media`, {
+                    method: 'PATCH',
+                    headers: {
+                        Authorization: `Bearer ${googleAccessToken.value}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: exportJson
+                });
+                if (!response.ok) {
+                    throw new Error(`Drive autosave update failed (${response.status})`);
+                }
+                googleDriveStatus.value = `Saved to Drive as ${metadata.name}`;
+                persistLastAutosave(metadata.name);
+                Notify.create({ type: 'positive', message: 'Tracker state saved to Google Drive.' });
+                return true;
+            }
+            catch (error) {
+                googleDriveStatus.value = 'Save failed';
+                Notify.create({ type: 'negative', message: 'Google Drive save failed.' });
+                console.error('Drive autosave update error', error);
+                return false;
+            }
+        }
         const boundary = '-------314159265358979323846';
         const delimiter = `\r\n--${boundary}\r\n`;
         const closeDelimiter = `\r\n--${boundary}--`;
@@ -210,6 +251,7 @@ export function useGoogleDrive2() {
         googleAccessToken,
         googleDriveStatus,
         lastAutosave,
+        autosaveEnabled,
         connectGoogleDrive,
         saveState
     };

@@ -1,4 +1,5 @@
 import { reactive, ref, watch } from 'vue';
+import { notifyExportStateChanged } from '@/composables/useTrackerExport';
 const STORAGE_KEY = 'course-criteria-data';
 function emptyCourse() {
     return {
@@ -95,6 +96,7 @@ const welcomeDialogVisible = ref(!hasStoredCourse.value);
 const course = reactive(storedCourse ?? emptyCourse());
 function saveCourse() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(course));
+    notifyExportStateChanged();
     hasStoredCourse.value = !isCourseEmpty(course);
 }
 function replaceCourse(data) {

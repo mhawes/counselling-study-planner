@@ -114,6 +114,7 @@ import { Notify } from 'quasar';
 import type { GlossaryEntry } from '@/types';
 import { uuid } from '@/utils/uuid';
 import ButtonWithConfirmation from '@/components/ButtonWithConfirmation.vue';
+import { notifyExportStateChanged } from '@/composables/useTrackerExport';
 
 const STORAGE_KEY = 'glossary-entries';
 
@@ -138,6 +139,7 @@ const subtermContext = ref<{ parentId: string; editingId?: string; term: string;
 
 watch(entries, (value) => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(value));
+  notifyExportStateChanged();
 }, { deep: true });
 
 function openEntryDialog(entry?: GlossaryEntry) {

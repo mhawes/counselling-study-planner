@@ -7,13 +7,10 @@
         <q-toolbar-title>Counsellor Study Tracker</q-toolbar-title>
         
         <div class="q-mx-md">
-          <q-chip dense outline text-color="white" color="white" v-if="googleDrive.lastAutosave">
+          <q-chip dense outline text-color="white" color="white" v-if="autosaveEnabled && lastAutosaveDate">
             <template #default>
-              Autosaved: {{ googleDrive.lastAutosave.filename }} • {{ new Date(googleDrive.lastAutosave.timestamp).toLocaleString() }}
+              Last autosave: {{ lastAutosaveDate.toLocaleString() }}
             </template>
-          </q-chip>
-          <q-chip dense outline text-color="white" color="white" v-else>
-            Autosave: none
           </q-chip>
         </div>
 
@@ -42,7 +39,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
+import { computed, ref, onMounted, watch } from 'vue';
 import { useQuasar } from 'quasar';
 import WelcomeDialog from '@/components/WelcomeDialog.vue';
 
@@ -52,7 +49,6 @@ import { useGoogleDrive2 } from '@/composables/useGoogleDrive2';
 
 const $q = useQuasar();
 const STORAGE_KEY = 'counsellor-study-tracker-dark-mode';
-const AUTOSAVE_KEY = 'google-drive-autosave';
 const isDark = ref(false);
 
 onMounted(() => {
@@ -75,36 +71,33 @@ watch(isDark, (value) => {
 
 // init google drive service and global autosave
 const googleDrive = useGoogleDrive2();
+const autosaveEnabled = googleDrive.autosaveEnabled;
 let autosaveTimer: number | null = null;
-const autosaveEnabled = ref<boolean>(false);
-try {
-  const stored = localStorage.getItem(AUTOSAVE_KEY);
-  if (stored !== null) autosaveEnabled.value = JSON.parse(stored);
-} catch {}
+
+const lastAutosaveDate = computed(() => {
+  const timestamp = googleDrive.lastAutosave.value?.timestamp;
+  if (!timestamp) return null;
+  const date = new Date(timestamp);
+  return Number.isNaN(date.getTime()) ? null : date;
+});
+
+function scheduleAutosave() {
+  if (!autosaveEnabled.value) return;
+  if (autosaveTimer) clearTimeout(autosaveTimer);
+  autosaveTimer = window.setTimeout(() => {
+    void googleDrive.saveState(exportJson.value);
+    autosaveTimer = null;
+  }, 800);
+}
 
 watch(
   exportJson,
-  () => {
-    if (!autosaveEnabled.value) return;
-    if (autosaveTimer) clearTimeout(autosaveTimer);
-    autosaveTimer = window.setTimeout(() => {
-      try {
-        googleDrive.saveState(exportJson.value);
-      } catch (err) {
-        console.error('Global autosave failed', err);
-      }
-      autosaveTimer = null;
-    }, 800) as unknown as number;
-  },
+  scheduleAutosave,
   { deep: false }
 );
 
-// keep autosave flag in localStorage when toggled elsewhere
-window.addEventListener('storage', (e) => {
-  if (e.key === AUTOSAVE_KEY) {
-    try {
-      autosaveEnabled.value = e.newValue ? JSON.parse(e.newValue) : false;
-    } catch {}
-  }
+watch(autosaveEnabled, (enabled) => {
+  if (enabled) scheduleAutosave();
 });
+
 </script>

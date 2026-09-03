@@ -93,6 +93,8 @@ import { Notify } from 'quasar';
 import GoogleDriveConnector from '@/components/GoogleDriveConnector.vue';
 import type { PlacementSession, SupervisionNote, Agency, Client, GlossaryEntry, CourseSchema, Claim } from '@/types';
 import { useCourseStore } from '@/composables/useCourseStore';
+import { exportJson, notifyExportStateChanged } from '@/composables/useTrackerExport';
+import { useGoogleDrive2 } from '@/composables/useGoogleDrive2';
 import ButtonWithConfirmation from '@/components/ButtonWithConfirmation.vue';
 
 const STORAGE_SESSIONS = 'placement-sessions';
@@ -105,15 +107,13 @@ const STORAGE_COURSE = 'course-criteria-data';
 const trackerUploadInput = ref<HTMLInputElement | null>(null);
 const driveConnector = ref<any>(null);
 const AUTOSAVE_KEY = 'google-drive-autosave';
-const autosaveEnabled = ref<boolean>(loadStorage<boolean>(AUTOSAVE_KEY, false));
+const { autosaveEnabled } = useGoogleDrive2();
 
 watch(autosaveEnabled, (val) => {
   try {
     localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(val));
   } catch {}
 });
-
-let autosaveTimer: number | null = null;
 
 function loadStorage<T>(key: string, fallback: T): T {
   try {
@@ -303,29 +303,8 @@ function applyImportedTrackerState(payload: any) {
   localStorage.setItem(STORAGE_CLIENTS, JSON.stringify(nextState.clients));
   localStorage.setItem(STORAGE_GLOSSARY, JSON.stringify(nextState.glossaryEntries));
   localStorage.setItem(STORAGE_COURSE, JSON.stringify(nextState.course));
+  notifyExportStateChanged();
 }
-
-const exportJson = computed(() => JSON.stringify(getExportJson(), null, 2));
-
-// watch exportJson and autosave when enabled (debounced)
-watch(
- exportJson,
- () => {
-   if (!autosaveEnabled.value) return;
-   if (!driveConnector.value?.saveStateToDrive) return;
-   if (autosaveTimer) {
-     clearTimeout(autosaveTimer);
-   }
-   autosaveTimer = window.setTimeout(() => {
-     try {
-       driveConnector.value.saveStateToDrive();
-     } catch (err) {
-       console.error('Autosave to Drive failed', err);
-     }
-     autosaveTimer = null;
-   }, 800) as unknown as number;
- }
-);
 
 function handleDriveFileLoaded(payload: unknown) {
  applyImportedTrackerState(payload);
