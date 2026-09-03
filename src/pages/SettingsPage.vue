@@ -218,29 +218,34 @@ function exportSupervisionCsv() {
 
 function exportCriteriaCsv() {
   const { course } = getCurrentState();
-  const header = ['Unit', 'Section', 'Criterion', 'Title', 'Evidence', 'Claim date', 'Source', 'Confirmed'];
-  const rows = [header];
+  const rows: string[][] = [[formatCsvValue(course?.courseCode)]];
 
   if (course) {
     course.units.forEach((unit) => {
+      rows.push([`UNIT: ${unit.id} ${unit.learningOutcome}`]);
+
       unit.sections.forEach((section) => {
+        rows.push(['LEARNING OUTCOME:', `${section.id} ${section.learningOutcome}`]);
+        rows.push(['Assessment criteria', 'Candidate guidance to criteria', 'Portfolio reference']);
+
         section.criteria.forEach((criterion) => {
-          if (criterion.claims.length === 0) {
-            rows.push([unit.id, section.id, criterion.id, criterion.title, '', '', '', '']);
-          } else {
-            criterion.claims.forEach((claim) => {
-              rows.push([
-                formatCsvValue(unit.id),
-                formatCsvValue(section.id),
-                formatCsvValue(criterion.id),
-                formatCsvValue(criterion.title),
-                formatCsvValue(claim.evidence),
-                formatCsvValue(claim.claimDate),
-                formatCsvValue(claim.source),
-                formatCsvValue(claim.confirmed ? 'Yes' : 'No')
-              ]);
-            });
-          }
+          const guidance = criterion.guidance.map((item) => `• ${item}`).join('\n');
+          const claims = criterion.claims
+            .map((claim) => {
+              let formattedDate = '';
+              if (claim.claimDate) {
+                const date = new Date(claim.claimDate);
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const year = date.getFullYear();
+                formattedDate = `${day}/${month}/${year}`;
+              }
+
+              return `${claim.evidence} ${formattedDate} (${claim.source})`.trim();
+            })
+            .join('\n');
+
+          rows.push([`${criterion.id} ${criterion.title}`, guidance, claims]);
         });
       });
     });
