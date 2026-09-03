@@ -90,13 +90,17 @@ export interface PlacementSession {
   theoryToApply: string;
 }
 
+export interface SupervisionClientNote {
+  clientId: string;
+  notes: string;
+}
+
 export interface SupervisionNote {
   id: string;
   date: string;
   supervisorName: string;
   duration: number;
-  clientIds?: string[];
-  clients: string;
+  clientNotes: SupervisionClientNote[];
   notes: string;
 }
 

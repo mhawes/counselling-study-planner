@@ -100,7 +100,7 @@
             />
           </div>
           <div class="col">
-            <q-toggle v-model="showIncompleteOnly" label="Show incomplete" dense />
+            <q-toggle v-model="showIncompleteOnly" label="Incomplete only" dense />
           </div>
         </div>
       </q-card-section>

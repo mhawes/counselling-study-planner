@@ -6,178 +6,250 @@
       message="Well done! You have completed your placement requirements."
       dismiss-label="Close"
     />
-    <div class="row q-gutter-md">
-      <div class="col">
-        <q-card>
-          <q-card-section>
-            <div class="text-h6">Clients and Agencies</div>
-          </q-card-section>
-          <q-separator />
-          <q-card-section>
-            <div class="row">
-              <div class="col-6 q-pr-xs">
-                <div class="row items-center q-mb-sm">
-                  <div class="col">
-                    <div class="text-subtitle1">Agencies</div>
-                  </div>
-                  <div class="col-auto">
-                    <q-btn
-                      dense
-                      color="primary"
-                      icon="add"
-                      label="New agency"
-                      @click="openAgencyDialog()"
-                    />
-                  </div>
-                </div>
-                <div v-if="agencies.length === 0" class="text-grey">
-                  No agencies added yet.
-                </div>
-                <div v-else>
-                  <q-table
-                    :rows="agencies"
-                    :columns="agencyColumns"
-                    row-key="id"
-                    flat
-                    bordered
-                    dense
-                    class="full-width"
-                  >
-                    <template #body-cell-actions="props">
-                      <q-td :props="props" align="center">
-                        <div class="row items-center justify-end q-gutter-xs">
-                          <q-btn
-                            dense
-                            flat
-                            icon="edit"
-                            color="primary"
-                            @click="openAgencyDialog(props.row)"
-                          />
-                          <ButtonWithConfirmation
-                            dense 
-                            flat 
-                            icon="delete"
-                            color="negative"
-                            confirm-message="Remove this agency?"
-                            @confirm="removeAgency(props.row.id)"
-                          />
-                        </div>
-                      </q-td>
-                    </template>
-                  </q-table>
-                </div>
-              </div>
+    <q-drawer
+      v-model="drawerOpen"
+      :mini="drawerMini"
+      show-if-above
+      bordered
+    >
+      <q-list padding>
+        
+        <q-item clickable v-ripple @click="drawerMini = !drawerMini">
+          <q-item-section avatar>
+            <q-icon :name="drawerMini ? 'chevron_right' : 'chevron_left'" />
+          </q-item-section>
+        </q-item>
+        <q-separator class="q-my-sm" />
+        <q-item
+          v-for="view in views"
+          :key="view.value"
+          v-ripple
+          clickable
+          :active="activeView === view.value"
+          active-class="bg-primary text-white"
+          @click="selectView(view.value)"
+        >
+          <q-item-section avatar>
+            <q-icon :name="view.icon" />
+          </q-item-section>
+          <q-item-section>{{ view.label }}</q-item-section>
+        </q-item>
+        
+      </q-list>
+    </q-drawer>
 
-              <div class="col-6 q-pl-xs">
-                <div class="row items-center q-mb-sm">
-                  <div class="col">
-                    <div class="text-subtitle1">Clients</div>
-                  </div>
-                  <div class="col-auto">
-                    <q-btn
-                      dense
-                      color="secondary"
-                      icon="add"
-                      label="New client"
-                      @click="openClientDialog()"
-                    />
-                  </div>
-                </div>
-                <div v-if="clients.length === 0" class="text-grey">
-                  No clients added yet.
-                </div>
-                <div v-else>
-                  <q-table
-                    :rows="clients"
-                    :columns="clientColumns"
-                    row-key="id"
-                    flat
-                    bordered
-                    dense
-                  >
-                    <template #body-cell-agency="props">
-                      <q-td :props="props">
-                        {{
-                          getAgencyNameById(props.row.agencyId) ||
-                          "Unassigned agency"
-                        }}
-                      </q-td>
-                    </template>
-                    <template #body-cell-actions="props">
-                      <q-td :props="props" align="center">
-                        <div class="row items-center justify-end q-gutter-xs">
-                          <q-btn
-                            dense
-                            flat
-                            icon="edit"
-                            color="primary"
-                            @click="openClientDialog(props.row)"
-                          />
-                          <ButtonWithConfirmation
-                            dense 
-                            flat 
-                            icon="delete"
-                            color="negative"
-                            confirm-message="Remove this client?"
-                            @confirm="removeClient(props.row.id)"
-                          />
-                        </div>
-                      </q-td>
-                    </template>
-                  </q-table>
-                </div>
-              </div>
-            </div>
-          </q-card-section>
-        </q-card>
-      </div>
-
-      <div class="col">
-        <q-card>
-          <q-card-section>
-            <div class="text-h6">Hours Summary</div>
-          </q-card-section>
-
-          <q-separator />
-
-          <q-card-section>
-            <div class="row q-mb-sm">
-              <div class="col">Overall hours:</div>
-              <div class="col-auto"><strong>{{ totalHours.toFixed(1) }}</strong></div>
-            </div>
-            <div class="q-mb-sm">Hours by client:</div>
-            <div
-              v-for="client in hoursByClient"
-              :key="client.key"
-              class="row items-center q-px-xs q-py-xs"
-            >
-              <div class="col">{{ client.key }}</div>
-              <div class="col-auto">
-                <strong>{{ client.value.toFixed(1) }}</strong>
-              </div>
-            </div>
-            <div class="q-mt-md q-mb-sm">Hours by agency:</div>
-            <div
-              v-for="agency in hoursByAgency"
-              :key="agency.key"
-              class="row items-center q-px-xs q-py-xs"
-            >
-              <div class="col">{{ agency.key }}</div>
-              <div class="col-auto">
-                <strong>{{ agency.value.toFixed(1) }}</strong>
-              </div>
-            </div>
-          </q-card-section>
-        </q-card>
-      </div>
+    <div class="q-mb-md">
+      <q-btn
+        flat
+        dense
+        icon="menu"
+        label="Placement menu"
+        class="lt-md"
+        @click="drawerOpen = true"
+      />
     </div>
 
-    <div class="row q-gutter-md">
+    <q-card v-if="activeView === 'overview'">
+      <q-card-section>
+        <div class="text-h6">Overview</div>
+      </q-card-section>
+      <q-separator />
+      <q-card-section>
+        <div class="row q-mb-sm">
+          <div class="col">Overall hours:</div>
+          <div class="col-auto"><strong>{{ totalHours.toFixed(1) }}</strong></div>
+        </div>
+        <div class="q-mb-sm">Hours by client:</div>
+        <div
+          v-for="client in hoursByClient"
+          :key="client.key"
+          class="row items-center q-px-xs q-py-xs"
+        >
+          <div class="col">{{ client.key }}</div>
+          <div class="col-auto"><strong>{{ client.value.toFixed(1) }}</strong></div>
+        </div>
+        <div class="q-mt-md q-mb-sm">Hours by agency:</div>
+        <div
+          v-for="agency in hoursByAgency"
+          :key="agency.key"
+          class="row items-center q-px-xs q-py-xs"
+        >
+          <div class="col">{{ agency.key }}</div>
+          <div class="col-auto"><strong>{{ agency.value.toFixed(1) }}</strong></div>
+        </div>
+      </q-card-section>
+    </q-card>
+
+    <q-card v-if="activeView === 'agencies'">
+      <q-card-section>
+        <div class="row items-center">
+          <div class="col"><div class="text-h6">Agencies</div></div>
+          <div class="col-auto">
+            <q-btn
+              dense
+              color="primary"
+              icon="add"
+              label="New agency"
+              @click="openAgencyDialog()"
+            />
+          </div>
+        </div>
+      </q-card-section>
+      <q-separator />
+      <q-card-section>
+        <div v-if="agencies.length === 0" class="text-grey">
+          No agencies added yet.
+        </div>
+        <q-table
+          v-else
+          :rows="agencies"
+          :columns="agencyColumns"
+          row-key="id"
+          flat
+          bordered
+          dense
+          class="full-width"
+        >
+          <template #body-cell-actions="props">
+            <q-td :props="props" align="center">
+              <div class="row items-center justify-end q-gutter-xs">
+                <q-btn
+                  dense
+                  flat
+                  icon="edit"
+                  color="primary"
+                  @click="openAgencyDialog(props.row)"
+                />
+                <ButtonWithConfirmation
+                  dense
+                  flat
+                  icon="delete"
+                  color="negative"
+                  confirm-message="Remove this agency?"
+                  @confirm="removeAgency(props.row.id)"
+                />
+              </div>
+            </q-td>
+          </template>
+        </q-table>
+      </q-card-section>
+    </q-card>
+
+    <q-card v-if="activeView === 'clients'">
+      <q-card-section>
+        <div class="row items-center">
+          <div class="col"><div class="text-h6">Clients</div></div>
+          <div class="col-auto">
+            <q-btn
+              dense
+              color="secondary"
+              icon="add"
+              label="New client"
+              @click="openClientDialog()"
+            />
+          </div>
+        </div>
+      </q-card-section>
+      <q-separator />
+      <q-card-section>
+        <div v-if="clients.length === 0" class="text-grey">
+          No clients added yet.
+        </div>
+        <q-table
+          v-else
+          :rows="clients"
+          :columns="clientColumns"
+          row-key="id"
+          flat
+          bordered
+          dense
+        >
+          <template #body-cell-avatar="props">
+            <q-td :props="props">
+              <q-avatar :color="clientColor(props.row.id)" size="sm">
+                <span class="text-white">{{ getClientInitials(props.row.id) }}</span>
+              </q-avatar>
+            </q-td>
+          </template>
+          <template #body-cell-agency="props">
+            <q-td :props="props">
+              {{ getAgencyNameById(props.row.agencyId) || "Unassigned agency" }}
+            </q-td>
+          </template>
+          <template #body-cell-actions="props">
+            <q-td :props="props" align="center">
+              <div class="row items-center justify-end q-gutter-xs">
+                <q-btn
+                  dense
+                  flat
+                  label="View Timeline"
+                  icon-right="timeline"
+                  color="secondary"
+                  aria-label="View client timeline"
+                  @click="openClientTimeline(props.row)"
+                />
+                <q-btn
+                  dense
+                  flat
+                  icon="edit"
+                  color="primary"
+                  @click="openClientDialog(props.row)"
+                />
+                <ButtonWithConfirmation
+                  dense
+                  flat
+                  icon="delete"
+                  color="negative"
+                  confirm-message="Remove this client?"
+                  @confirm="removeClient(props.row.id)"
+                />
+              </div>
+            </q-td>
+          </template>
+        </q-table>
+      </q-card-section>
+    </q-card>
+
+    <q-dialog v-model="showClientTimelineDialog">
+      <q-card style="width: 700px; max-width: 90vw">
+        <q-card-section>
+          <div class="text-h6">
+            {{ timelineClient?.anonymousIdentifier || "Client" }} timeline
+          </div>
+        </q-card-section>
+        <q-separator />
+        <q-card-section>
+          <div v-if="clientTimeline.length === 0" class="text-grey">
+            No session or supervision notes recorded for this client.
+          </div>
+          <q-timeline v-else color="primary" layout="loose">
+            <q-timeline-entry
+              v-for="event in clientTimeline"
+              :key="event.id"
+              :title="event.title"
+              :subtitle="event.date || 'No date'"
+              :icon="event.icon"
+              :color="event.color"
+            >
+              <div class="text-caption">{{ event.meta }}</div>
+              <div v-if="event.details" class="q-mt-sm">
+                {{ event.details }}
+              </div>
+            </q-timeline-entry>
+          </q-timeline>
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn flat label="Close" color="secondary" @click="showClientTimelineDialog = false" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+    <div v-if="activeView === 'sessions'" class="row q-gutter-md">
       <div class="col-12">
         <q-card class="q-mt-md">
           <q-card-section class="row items-center q-gutter-sm">
             <div class="col">
-              <div class="text-h6">Session records</div>
+              <div class="text-h6">Session notes</div>
             </div>
             <div class="col-6 col-md-4">
               <q-select
@@ -281,10 +353,10 @@
       </div>
     </div>
 
-    <q-card class="q-mt-lg">
+    <q-card v-if="activeView === 'supervision'" class="q-mt-lg">
       <q-card-section class="row items-center q-gutter-sm">
         <div class="col">
-          <div class="text-h6">Supervision records</div>
+          <div class="text-h6">Supervision notes</div>
         </div>
         <div class="col-auto">
           <q-btn
@@ -315,8 +387,22 @@
                 Duration: {{ note.duration }} h • Clients:
                 {{ getSupervisionClientNames(note) }}
               </div>
-              <div class="q-mt-xs">
-                {{ note.notes || "No notes recorded." }}
+              <div
+                v-for="(clientNote, index) in note.clientNotes || []"
+                :key="index"
+                class="q-mt-xs"
+              >
+                <strong>{{ getClientNameById(clientNote.clientId) || "Unknown client" }}:</strong>
+                {{ clientNote.notes || "No client-specific notes." }}
+              </div>
+              <div v-if="note.notes" class="q-mt-xs">
+                <strong>General notes:</strong> {{ note.notes }}
+              </div>
+              <div
+                v-if="(!note.clientNotes || note.clientNotes.length === 0) && !note.notes"
+                class="q-mt-xs"
+              >
+                No notes recorded.
               </div>
             </q-item-section>
             <q-item-section
@@ -559,23 +645,65 @@
                   dense
                 />
               </div>
-              <div class="col-12 col-sm-6">
-                <q-select
-                  v-model="editingSupervision.clientIds"
-                  :options="clientOptions"
-                  option-label="label"
-                  option-value="value"
-                  label="Clients discussed"
-                  dense
-                  multiple
-                  emit-value
-                  map-options
-                />
+              <div class="col-12">
+                <div class="row items-center q-mb-sm">
+                  <div class="col text-subtitle2">Client-specific notes</div>
+                  <q-btn
+                    dense
+                    flat
+                    color="primary"
+                    icon="add"
+                    label="Add client note"
+                    type="button"
+                    @click="addSupervisionClientNote"
+                  />
+                </div>
+                <div
+                  v-for="(clientNote, index) in editingSupervision.clientNotes"
+                  :key="index"
+                  class="row items-start q-col-gutter-md q-mb-sm"
+                >
+                  <div class="col-12 col-sm-5">
+                    <q-select
+                      v-model="clientNote.clientId"
+                      :options="clientOptions"
+                      option-label="label"
+                      option-value="value"
+                      label="Client"
+                      dense
+                      emit-value
+                      map-options
+                    />
+                  </div>
+                  <div class="col">
+                    <q-input
+                      v-model="clientNote.notes"
+                      label="Notes"
+                      type="textarea"
+                      autogrow
+                      dense
+                    />
+                  </div>
+                  <div class="col-auto">
+                    <q-btn
+                      dense
+                      flat
+                      round
+                      color="negative"
+                      icon="delete"
+                      aria-label="Remove client note"
+                      @click="removeSupervisionClientNote(index)"
+                    />
+                  </div>
+                </div>
+                <div v-if="editingSupervision.clientNotes.length === 0" class="text-grey">
+                  No client-specific notes added.
+                </div>
               </div>
               <div class="col-12">
                 <q-input
                   v-model="editingSupervision.notes"
-                  label="Notes"
+                  label="General notes"
                   type="textarea"
                   autogrow
                   dense
@@ -600,7 +728,7 @@
 
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from "vue";
-import { Notify } from "quasar";
+import { Notify, useQuasar } from "quasar";
 import type {
   PlacementSession,
   SupervisionNote,
@@ -618,6 +746,36 @@ const STORAGE_SUPERVISION = "placement-supervision";
 const STORAGE_AGENCIES = "placement-agencies";
 const STORAGE_CLIENTS = "placement-clients";
 const { course } = useCourseStore();
+const $q = useQuasar();
+
+type PlacementView = "overview" | "sessions" | "supervision" | "agencies" | "clients";
+
+const views: Array<{ value: PlacementView; label: string; icon: string }> = [
+  { value: "overview", label: "Overview", icon: "dashboard" },
+  { value: "sessions", label: "Session notes", icon: "edit_note" },
+  { value: "supervision", label: "Supervision notes", icon: "supervised_user_circle" },
+  { value: "agencies", label: "Agencies", icon: "business" },
+  { value: "clients", label: "Clients", icon: "people" },
+];
+
+const activeView = ref<PlacementView>("overview");
+const drawerOpen = ref(true);
+const drawerMini = ref(false);
+
+function selectView(view: PlacementView) {
+  activeView.value = view;
+  if ($q.screen.lt.md) {
+    drawerOpen.value = false;
+  }
+}
+
+function addSupervisionClientNote() {
+  editingSupervision.clientNotes.push({ clientId: "", notes: "" });
+}
+
+function removeSupervisionClientNote(index: number) {
+  editingSupervision.clientNotes.splice(index, 1);
+}
 
 function loadStorage<T>(key: string, fallback: T): T {
   try {
@@ -637,8 +795,10 @@ const clients = ref<Client[]>(loadStorage(STORAGE_CLIENTS, []));
 
 const showAgencyDialog = ref(false);
 const showClientDialog = ref(false);
+const showClientTimelineDialog = ref(false);
 const showSessionDialog = ref(false);
 const showSupervisionDialog = ref(false);
+const timelineClient = ref<Client | null>(null);
 
 const editingAgency = reactive<Agency>({
   id: "",
@@ -672,9 +832,42 @@ const editingSupervision = reactive<SupervisionNote>({
   date: "",
   supervisorName: "",
   duration: 1,
-  clientIds: [],
-  clients: "",
+  clientNotes: [],
   notes: "",
+});
+
+const clientTimeline = computed(() => {
+  if (!timelineClient.value) return [];
+  const clientId = timelineClient.value.id;
+  const events = [
+    ...sessions.value
+      .filter((session) => session.clientId === clientId)
+      .map((session) => ({
+        id: `session-${session.id}`,
+        date: session.date,
+        title: "Session note",
+        icon: "edit_note",
+        color: "primary",
+        meta: `${session.duration} hours @ ${getSessionAgencyName(session)}`,
+        details: [session.whatHappened, session.personalProcess, session.theoryToApply]
+          .filter(Boolean)
+          .join("\n\n"),
+      })),
+    ...supervisionNotes.value.flatMap((note) =>
+      note.clientNotes
+        .filter((clientNote) => clientNote.clientId === clientId)
+        .map((clientNote, index) => ({
+          id: `supervision-${note.id}-${index}`,
+          date: note.date,
+          title: "Supervision note",
+          icon: "supervised_user_circle",
+          color: "secondary",
+          meta: `${note.duration} hours with ${note.supervisorName}`,
+          details: clientNote.notes,
+        })),
+    ),
+  ];
+  return events.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
 });
 
 watch(
@@ -736,17 +929,6 @@ watch(
   },
 );
 
-watch(
-  () => editingSupervision.clientIds,
-  (value) => {
-    editingSupervision.clients = (value || [])
-      .map((id) => getClientNameById(id))
-      .filter((name) => name)
-      .join(", ");
-  },
-  { deep: true },
-);
-
 function getAgencyNameById(id?: string) {
   return agencies.value.find((agency) => agency.id === id)?.name ?? "";
 }
@@ -755,6 +937,11 @@ function getClientNameById(id?: string) {
   return (
     clients.value.find((client) => client.id === id)?.anonymousIdentifier ?? ""
   );
+}
+
+function openClientTimeline(client: Client) {
+  timelineClient.value = client;
+  showClientTimelineDialog.value = true;
 }
 
 function getSessionClientName(session: PlacementSession) {
@@ -772,10 +959,10 @@ function getSessionAgencyName(session: PlacementSession) {
 }
 
 function getSupervisionClientNames(note: SupervisionNote) {
-  const names = (note.clientIds || [])
-    .map((id) => getClientNameById(id))
+  const names = (note.clientNotes || [])
+    .map((clientNote) => getClientNameById(clientNote.clientId))
     .filter((name) => name);
-  return names.length > 0 ? names.join(", ") : note.clients || "None";
+  return names.length > 0 ? names.join(", ") : "None";
 }
 
 const agencyOptions = computed(() =>
@@ -801,6 +988,14 @@ const agencyColumns = [
 ];
 
 const clientColumns = [
+  {
+    name: "avatar",
+    label: "",
+    field: "id",
+    align: "center" as const,
+    style: "width: 40px",
+    headerStyle: "width: 40px",
+  },
   {
     name: "identifier",
     label: "Client",
@@ -951,18 +1146,21 @@ function openSessionDialog(session?: PlacementSession) {
 
 function openSupervisionDialog(note?: SupervisionNote) {
   if (note) {
-    Object.assign(editingSupervision, note);
-    if (!editingSupervision.clientIds) {
-      editingSupervision.clientIds = [];
-    }
+    Object.assign(editingSupervision, {
+      id: note.id,
+      date: note.date,
+      supervisorName: note.supervisorName,
+      duration: note.duration,
+      clientNotes: note.clientNotes || [],
+      notes: note.notes,
+    });
   } else {
     Object.assign(editingSupervision, {
       id: "",
       date: "",
       supervisorName: "",
       duration: 1,
-      clientIds: [],
-      clients: "",
+      clientNotes: [],
       notes: "",
     });
   }
@@ -1074,11 +1272,9 @@ function removeClient(id: string) {
   sessions.value = sessions.value.map((session) =>
     session.clientId === id ? { ...session, clientId: undefined } : session,
   );
-  if (editingSupervision.clientIds) {
-    editingSupervision.clientIds = editingSupervision.clientIds.filter(
-      (clientId) => clientId !== id,
-    );
-  }
+  editingSupervision.clientNotes = editingSupervision.clientNotes.filter(
+    (clientNote) => clientNote.clientId !== id,
+  );
 
   Notify.create({ type: "warning", message: "Client removed." });
 }

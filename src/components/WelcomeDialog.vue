@@ -13,20 +13,20 @@
           :options="defaultCourseOptions"
           type="radio"
         />
-        <div class="row q-gutter-md q-mt-md">
-          <div class="col-12 col-md-6">
-            <q-btn unelevated label="Load selected set" color="primary" :disable="!selectedDefaultCourseId" @click="loadDefaultCourse" class="full-width" />
+        <div class="row q-gutter-md q-mt-md justify-center">
+          <div class="col-12 col-md-auto flex flex-center">
+            <q-btn unelevated label="Load selected set" color="primary" :disable="!selectedDefaultCourseId" @click="loadDefaultCourse" class="welcome-dialog-button" />
           </div>
-          <div class="col-12 col-md-6">
-            <q-btn outlined label="Import criteria JSON" color="secondary" @click="triggerFileInput" class="full-width" />
+          <div class="col-12 col-md-auto flex flex-center">
+            <q-btn outlined label="Import criteria JSON" color="secondary" @click="triggerFileInput" class="welcome-dialog-button" />
           </div>
         </div>
-        <div class="row q-gutter-md q-mt-sm">
-          <div class="col-12 col-md-6">
-            <q-btn flat label="Load from Google Drive" color="primary" @click="loadFromDrive" class="full-width" />
+        <div class="row q-gutter-md q-mt-sm justify-center">
+          <div class="col-12 col-md-auto flex flex-center">
+            <q-btn flat label="Load from Google Drive" color="primary" @click="loadFromDrive" class="welcome-dialog-button" />
           </div>
-          <div class="col-12 col-md-6">
-            <q-btn flat label="Continue with empty model" color="secondary" @click="store.continueWithEmptyModel" class="full-width" />
+          <div class="col-12 col-md-auto flex flex-center">
+            <q-btn flat label="Continue with empty model" color="secondary" @click="store.continueWithEmptyModel" class="welcome-dialog-button" />
           </div>
         </div>
         <input ref="fileInput" type="file" accept=".json,application/json" @change="onFileSelected" style="display:none" />
@@ -251,3 +251,9 @@ function isValidCourseSchema(obj: unknown): obj is CourseSchema {
   return true;
 }
 </script>
+
+<style scoped>
+.welcome-dialog-button {
+  min-width: 220px;
+}
+</style>
