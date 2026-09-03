@@ -801,7 +801,8 @@ function unitComplete(unit: Unit) {
   const perType = course.rules?.perType;
   const sources = requiredSources.value ?? [];
   if (!perType || perType.scope === 'unit') {
-    return sources.every((source) => unitSourceCount(unit, source) >= (course.rules?.perType?.counts?.[source] ?? 0));
+    return sources.every((source) => unitSourceCount(unit, source) >= (course.rules?.perType?.counts?.[source] ?? 0))
+      && unit.sections.every((section) => sectionComplete(section));
   }
 
   // perType.scope === 'section'
@@ -817,4 +818,3 @@ const claimColumns = [
 ];
 
 </script>
-
