@@ -24,3 +24,12 @@ A Vue 3 + Quasar application for managing placement hours, counselling session p
 ```bash
 npm run build
 ```
+
+## Deploy to GitHub Pages
+
+The `main` branch is deployed automatically by the
+[GitHub Actions workflow](.github/workflows/deploy-pages.yml). In the repository
+settings, set **Pages > Build and deployment > Source** to **GitHub Actions**.
+
+The production site is available at:
+`https://mhawes.github.io/counselling-study-planner/`
