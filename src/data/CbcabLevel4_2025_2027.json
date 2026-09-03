@@ -11,6 +11,11 @@
         "TutorObservation": 1,
         "Testimony": 1
       }
+    },
+    "placement": {
+      "hasPlacement": true,
+      "requiredPlacementHours": 100,
+      "requiredPlacementClients": 5
     }
   },
   "units": [

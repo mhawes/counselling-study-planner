@@ -9,6 +9,17 @@ export const exportStateRevision = ref(0);
 export function notifyExportStateChanged() {
     exportStateRevision.value += 1;
 }
+export function clearTrackerState() {
+    [
+        STORAGE_SESSIONS,
+        STORAGE_SUPERVISION,
+        STORAGE_AGENCIES,
+        STORAGE_CLIENTS,
+        STORAGE_GLOSSARY,
+        STORAGE_COURSE
+    ].forEach((key) => localStorage.removeItem(key));
+    notifyExportStateChanged();
+}
 function loadStorage(key, fallback) {
     try {
         const raw = localStorage.getItem(key);

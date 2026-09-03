@@ -70,6 +70,14 @@ function isValidCourseSchema(obj) {
                     return false;
             }
         }
+        if (r.placement != null) {
+            if (typeof r.placement !== 'object' || typeof r.placement.hasPlacement !== 'boolean')
+                return false;
+            for (const key of ['requiredPlacementHours', 'requiredPlacementClients']) {
+                if (r.placement[key] != null && (typeof r.placement[key] !== 'number' || r.placement[key] < 0))
+                    return false;
+            }
+        }
     }
     return true;
 }

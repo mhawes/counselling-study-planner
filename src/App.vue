@@ -29,7 +29,7 @@
         </div>
 
         <q-btn-group flat dense>
-          <q-btn flat dense to="/placement" icon="home" label="Placement" color="white" class="q-mx-xs" />
+          <q-btn v-if="hasPlacement" flat dense to="/placement" icon="home" label="Placement" color="white" class="q-mx-xs" />
           <q-btn flat dense to="/course-criteria" icon="school" label="Criteria" color="white" class="q-mx-xs" />
           <q-btn flat dense to="/glossary" icon="menu_book" label="Glossary" color="white" class="q-mx-xs" />
           <q-btn flat dense to="/settings" icon="settings" color="white" class="q-mx-xs" />
@@ -56,14 +56,17 @@
 import { computed, ref, onMounted, watch } from 'vue';
 import { useQuasar } from 'quasar';
 import WelcomeDialog from '@/components/WelcomeDialog.vue';
+import { useCourseStore } from '@/composables/useCourseStore';
 
 // autosave support
 import { exportJson } from '@/composables/useTrackerExport';
 import { useGoogleDrive2 } from '@/composables/useGoogleDrive2';
 
 const $q = useQuasar();
+const { course } = useCourseStore();
 const STORAGE_KEY = 'counsellor-study-tracker-dark-mode';
 const isDark = ref(false);
+const hasPlacement = computed(() => course.rules?.placement?.hasPlacement === true);
 
 onMounted(() => {
   try {

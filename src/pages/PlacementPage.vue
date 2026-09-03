@@ -1,9 +1,9 @@
 <template>
   <q-page padding>
     <FireworksDisplay
-      :active="totalHours >= 100"
+      :active="placementComplete"
       title="Placement milestone reached!"
-      message="Well done! You have exceeded 100 placement hours."
+      message="Well done! You have completed your placement requirements."
       dismiss-label="Close"
     />
     <div class="row q-gutter-md">
@@ -611,11 +611,13 @@ import { uuid } from "@/utils/uuid";
 import FireworksDisplay from '@/components/FireworksDisplay.vue';
 import ButtonWithConfirmation from '@/components/ButtonWithConfirmation.vue';
 import { notifyExportStateChanged } from '@/composables/useTrackerExport';
+import { useCourseStore } from '@/composables/useCourseStore';
 
 const STORAGE_SESSIONS = "placement-sessions";
 const STORAGE_SUPERVISION = "placement-supervision";
 const STORAGE_AGENCIES = "placement-agencies";
 const STORAGE_CLIENTS = "placement-clients";
+const { course } = useCourseStore();
 
 function loadStorage<T>(key: string, fallback: T): T {
   try {
@@ -864,6 +866,18 @@ const filteredSessions = computed(() => {
 const totalHours = computed(() =>
   sessions.value.reduce((sum, item) => sum + item.duration, 0),
 );
+
+const workedWithClientCount = computed(() => {
+  return new Set(sessions.value.map((session) => session.clientId).filter(Boolean)).size;
+});
+
+const placementComplete = computed(() => {
+  const placement = course.rules?.placement;
+  if (!placement?.hasPlacement) return false;
+  const hoursComplete = placement.requiredPlacementHours == null || totalHours.value >= placement.requiredPlacementHours;
+  const clientsComplete = placement.requiredPlacementClients == null || workedWithClientCount.value >= placement.requiredPlacementClients;
+  return hoursComplete && clientsComplete;
+});
 
 const hoursByClient = computed(() => {
   const map = new Map<string, number>();

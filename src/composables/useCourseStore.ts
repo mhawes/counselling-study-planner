@@ -54,6 +54,12 @@ function isValidCourseSchema(obj: unknown): obj is CourseSchema {
         if (typeof r.perType.counts[k] !== 'number' || r.perType.counts[k] < 0) return false;
       }
     }
+    if (r.placement != null) {
+      if (typeof r.placement !== 'object' || typeof r.placement.hasPlacement !== 'boolean') return false;
+      for (const key of ['requiredPlacementHours', 'requiredPlacementClients']) {
+        if (r.placement[key] != null && (typeof r.placement[key] !== 'number' || r.placement[key] < 0)) return false;
+      }
+    }
   }
 
   return true;

@@ -93,7 +93,7 @@ import { Notify } from 'quasar';
 import GoogleDriveConnector from '@/components/GoogleDriveConnector.vue';
 import type { PlacementSession, SupervisionNote, Agency, Client, GlossaryEntry, CourseSchema, Claim } from '@/types';
 import { useCourseStore } from '@/composables/useCourseStore';
-import { exportJson, notifyExportStateChanged } from '@/composables/useTrackerExport';
+import { clearTrackerState, exportJson, notifyExportStateChanged } from '@/composables/useTrackerExport';
 import { useGoogleDrive2 } from '@/composables/useGoogleDrive2';
 import ButtonWithConfirmation from '@/components/ButtonWithConfirmation.vue';
 
@@ -318,8 +318,7 @@ const glossaryCount = computed(() => getCurrentState().glossaryEntries.length);
 const courseUnits = computed(() => getCurrentState().course?.units.length ?? 0);
 
 function resetModel() {
-  store.continueWithEmptyModel();
-  store.welcomeDialogVisible.value = true;
-  Notify.create({ type: 'positive', message: 'Model cleared. Choose a criteria set to get started.' });
+  clearTrackerState();
+  window.location.reload();
 }
 </script>

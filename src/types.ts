@@ -47,6 +47,12 @@ export interface CriteriaRules {
     scope: RuleScope;
     counts: Partial<Record<ClaimSource, number>>;
   };
+
+  placement?: {
+    hasPlacement: boolean;
+    requiredPlacementHours?: number;
+    requiredPlacementClients?: number;
+  }
 }
 
 export interface CourseSchema {
