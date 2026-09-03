@@ -20,9 +20,22 @@ function loadStorage(key, fallback) {
         return fallback;
     }
 }
+async function fetchWithTimeout(input, init = {}, timeoutMs = 15000) {
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), timeoutMs);
+    try {
+        return await fetch(input, { ...init, signal: controller.signal });
+    }
+    finally {
+        window.clearTimeout(timeout);
+    }
+}
 const autosaveEnabled = ref(loadStorage(STORAGE_AUTOSAVE, false));
 const storedAutosave = loadStorage(STORAGE_LAST_AUTOSAVE, null);
 const lastAutosave = ref(isAutosaveInfo(storedAutosave) ? storedAutosave : null);
+export const sharedGoogleAccessToken = ref('');
+export const sharedGoogleDriveStatus = ref('Not connected');
+export const sharedGoogleDriveSaving = ref(false);
 export function recordAutosave(filename) {
     const payload = { filename, timestamp: new Date().toISOString() };
     lastAutosave.value = payload;
@@ -30,8 +43,9 @@ export function recordAutosave(filename) {
 }
 export function useGoogleDrive2() {
     const googleClientId = ref(GOOGLE_CLIENT_ID);
-    const googleAccessToken = ref('');
-    const googleDriveStatus = ref('Not connected');
+    const googleAccessToken = sharedGoogleAccessToken;
+    const googleDriveStatus = sharedGoogleDriveStatus;
+    const googleDriveSaving = sharedGoogleDriveSaving;
     const googleTokenClient = ref(null);
     const googleScriptLoaded = ref(false);
     function persistLastAutosave(filename) {
@@ -123,102 +137,105 @@ export function useGoogleDrive2() {
             return false;
         }
     }
-    async function saveState(exportJson) {
+    async function saveState(exportJson, options = {}) {
         if (!exportJson)
             return false;
-        if (!googleAccessToken.value) {
-            const ok = await connectGoogleDrive();
-            if (!ok)
-                return false;
-        }
-        const metadata = {
-            name: `counsellor-study-tracker-${new Date().toISOString().slice(0, 10)}.json`,
-            mimeType: 'application/json'
-        };
-        // ensure folder
-        const folderName = 'counselling-study-planner';
-        let folderId = null;
+        googleDriveSaving.value = true;
         try {
-            const q = encodeURIComponent(`name='${folderName}' and mimeType='application/vnd.google-apps.folder' and trashed=false`);
-            const listResp = await fetch(`https://www.googleapis.com/drive/v3/files?fields=files(id,name)&q=${q}`, {
-                headers: { Authorization: `Bearer ${googleAccessToken.value}` }
-            });
-            if (listResp.ok) {
-                const listPayload = await listResp.json();
-                const found = (listPayload.files || [])[0];
-                if (found)
-                    folderId = found.id;
+            if (!googleAccessToken.value) {
+                const ok = await connectGoogleDrive();
+                if (!ok)
+                    return false;
             }
-            if (!folderId) {
-                const createResp = await fetch('https://www.googleapis.com/drive/v3/files', {
-                    method: 'POST',
-                    headers: {
-                        Authorization: `Bearer ${googleAccessToken.value}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ name: folderName, mimeType: 'application/vnd.google-apps.folder' })
-                });
-                if (createResp.ok) {
-                    const created = await createResp.json();
-                    folderId = created.id;
-                }
-            }
-        }
-        catch (err) {
-            console.warn('Folder check/create failed', err);
-        }
-        if (folderId)
-            metadata.parents = [folderId];
-        let existingFileId = null;
-        try {
-            const parentClause = folderId ? `'${folderId}' in parents and ` : '';
-            const fileQuery = encodeURIComponent(`${parentClause}name='${metadata.name}' and mimeType='application/json' and trashed=false`);
-            const existingResponse = await fetch(`https://www.googleapis.com/drive/v3/files?fields=files(id,name)&q=${fileQuery}`, { headers: { Authorization: `Bearer ${googleAccessToken.value}` } });
-            if (existingResponse.ok) {
-                const existingPayload = await existingResponse.json();
-                existingFileId = existingPayload.files?.[0]?.id ?? null;
-            }
-        }
-        catch (error) {
-            console.warn('Existing autosave lookup failed', error);
-        }
-        if (existingFileId) {
+            const metadata = {
+                name: `counsellor-study-tracker-${new Date().toISOString().slice(0, 10)}.json`,
+                mimeType: 'application/json'
+            };
+            // ensure folder
+            const folderName = 'counselling-study-planner';
+            let folderId = null;
             try {
-                const response = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${existingFileId}?uploadType=media`, {
-                    method: 'PATCH',
-                    headers: {
-                        Authorization: `Bearer ${googleAccessToken.value}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: exportJson
+                const q = encodeURIComponent(`name='${folderName}' and mimeType='application/vnd.google-apps.folder' and trashed=false`);
+                const listResp = await fetchWithTimeout(`https://www.googleapis.com/drive/v3/files?fields=files(id,name)&q=${q}`, {
+                    headers: { Authorization: `Bearer ${googleAccessToken.value}` }
                 });
-                if (!response.ok) {
-                    throw new Error(`Drive autosave update failed (${response.status})`);
+                if (listResp.ok) {
+                    const listPayload = await listResp.json();
+                    const found = (listPayload.files || [])[0];
+                    if (found)
+                        folderId = found.id;
                 }
-                googleDriveStatus.value = `Saved to Drive as ${metadata.name}`;
-                persistLastAutosave(metadata.name);
-                Notify.create({ type: 'positive', message: 'Tracker state saved to Google Drive.' });
-                return true;
+                if (!folderId) {
+                    const createResp = await fetchWithTimeout('https://www.googleapis.com/drive/v3/files', {
+                        method: 'POST',
+                        headers: {
+                            Authorization: `Bearer ${googleAccessToken.value}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ name: folderName, mimeType: 'application/vnd.google-apps.folder' })
+                    });
+                    if (createResp.ok) {
+                        const created = await createResp.json();
+                        folderId = created.id;
+                    }
+                }
+            }
+            catch (err) {
+                console.warn('Folder check/create failed', err);
+            }
+            if (folderId)
+                metadata.parents = [folderId];
+            let existingFileId = null;
+            try {
+                const parentClause = folderId ? `'${folderId}' in parents and ` : '';
+                const fileQuery = encodeURIComponent(`${parentClause}name='${metadata.name}' and mimeType='application/json' and trashed=false`);
+                const existingResponse = await fetchWithTimeout(`https://www.googleapis.com/drive/v3/files?fields=files(id,name)&q=${fileQuery}`, { headers: { Authorization: `Bearer ${googleAccessToken.value}` } });
+                if (existingResponse.ok) {
+                    const existingPayload = await existingResponse.json();
+                    existingFileId = existingPayload.files?.[0]?.id ?? null;
+                }
             }
             catch (error) {
-                googleDriveStatus.value = 'Save failed';
-                Notify.create({ type: 'negative', message: 'Google Drive save failed.' });
-                console.error('Drive autosave update error', error);
-                return false;
+                console.warn('Existing autosave lookup failed', error);
             }
-        }
-        const boundary = '-------314159265358979323846';
-        const delimiter = `\r\n--${boundary}\r\n`;
-        const closeDelimiter = `\r\n--${boundary}--`;
-        const multipartRequestBody = delimiter +
-            'Content-Type: application/json; charset=UTF-8\r\n\r\n' +
-            JSON.stringify(metadata) +
-            delimiter +
-            'Content-Type: application/json\r\n\r\n' +
-            exportJson +
-            closeDelimiter;
-        try {
-            const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+            if (existingFileId) {
+                try {
+                    const response = await fetchWithTimeout(`https://www.googleapis.com/upload/drive/v3/files/${existingFileId}?uploadType=media`, {
+                        method: 'PATCH',
+                        headers: {
+                            Authorization: `Bearer ${googleAccessToken.value}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: exportJson
+                    });
+                    if (!response.ok) {
+                        throw new Error(`Drive autosave update failed (${response.status})`);
+                    }
+                    googleDriveStatus.value = `Saved to Drive as ${metadata.name}`;
+                    persistLastAutosave(metadata.name);
+                    if (!options.silent) {
+                        Notify.create({ type: 'positive', message: 'Tracker state saved to Google Drive.' });
+                    }
+                    return true;
+                }
+                catch (error) {
+                    googleDriveStatus.value = 'Save failed';
+                    Notify.create({ type: 'negative', message: 'Google Drive save failed.' });
+                    console.error('Drive autosave update error', error);
+                    return false;
+                }
+            }
+            const boundary = '-------314159265358979323846';
+            const delimiter = `\r\n--${boundary}\r\n`;
+            const closeDelimiter = `\r\n--${boundary}--`;
+            const multipartRequestBody = delimiter +
+                'Content-Type: application/json; charset=UTF-8\r\n\r\n' +
+                JSON.stringify(metadata) +
+                delimiter +
+                'Content-Type: application/json\r\n\r\n' +
+                exportJson +
+                closeDelimiter;
+            const response = await fetchWithTimeout('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
                 method: 'POST',
                 headers: {
                     Authorization: `Bearer ${googleAccessToken.value}`,
@@ -236,7 +253,9 @@ export function useGoogleDrive2() {
             const result = await response.json();
             googleDriveStatus.value = `Saved to Drive as ${result.name}`;
             persistLastAutosave(result.name);
-            Notify.create({ type: 'positive', message: 'Tracker state saved to Google Drive.' });
+            if (!options.silent) {
+                Notify.create({ type: 'positive', message: 'Tracker state saved to Google Drive.' });
+            }
             return true;
         }
         catch (error) {
@@ -245,11 +264,15 @@ export function useGoogleDrive2() {
             console.error(error);
             return false;
         }
+        finally {
+            googleDriveSaving.value = false;
+        }
     }
     return {
         googleClientId,
         googleAccessToken,
         googleDriveStatus,
+        googleDriveSaving,
         lastAutosave,
         autosaveEnabled,
         connectGoogleDrive,

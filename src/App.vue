@@ -7,11 +7,25 @@
         <q-toolbar-title>Counsellor Study Tracker</q-toolbar-title>
         
         <div class="q-mx-md">
-          <q-chip dense outline text-color="white" color="white" v-if="autosaveEnabled && lastAutosaveDate">
+          <q-chip dense outline text-color="white" color="white" v-if="autosaveEnabled && (googleDriveSaving || lastAutosaveDate)">
             <template #default>
-              Last autosave: {{ lastAutosaveDate.toLocaleString() }}
+              <span v-if="googleDriveSaving">Saving to Google Drive...</span>
+              <span v-else>Last autosave: {{ lastAutosaveDate.toLocaleString() }}</span>
             </template>
           </q-chip>
+          <q-btn
+            v-else-if="!autosaveEnabled"
+            flat
+            dense
+            round
+            color="white"
+            icon="add_to_drive"
+            :loading="manualSaveInProgress"
+            aria-label="Save to Google Drive"
+            @click="saveToGoogleDrive"
+          >
+            <q-tooltip>Save to Google Drive</q-tooltip>
+          </q-btn>
         </div>
 
         <q-btn-group flat dense>
@@ -72,7 +86,9 @@ watch(isDark, (value) => {
 // init google drive service and global autosave
 const googleDrive = useGoogleDrive2();
 const autosaveEnabled = googleDrive.autosaveEnabled;
+const googleDriveSaving = googleDrive.googleDriveSaving;
 let autosaveTimer: number | null = null;
+const manualSaveInProgress = ref(false);
 
 const lastAutosaveDate = computed(() => {
   const timestamp = googleDrive.lastAutosave.value?.timestamp;
@@ -81,11 +97,21 @@ const lastAutosaveDate = computed(() => {
   return Number.isNaN(date.getTime()) ? null : date;
 });
 
+async function saveToGoogleDrive() {
+  if (manualSaveInProgress.value) return;
+  manualSaveInProgress.value = true;
+  try {
+    await googleDrive.saveState(exportJson.value);
+  } finally {
+    manualSaveInProgress.value = false;
+  }
+}
+
 function scheduleAutosave() {
   if (!autosaveEnabled.value) return;
   if (autosaveTimer) clearTimeout(autosaveTimer);
   autosaveTimer = window.setTimeout(() => {
-    void googleDrive.saveState(exportJson.value);
+    void googleDrive.saveState(exportJson.value, { silent: true });
     autosaveTimer = null;
   }, 800);
 }

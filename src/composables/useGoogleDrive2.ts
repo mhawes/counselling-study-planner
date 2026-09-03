@@ -25,9 +25,22 @@ function loadStorage<T>(key: string, fallback: T): T {
   }
 }
 
+async function fetchWithTimeout(input: RequestInfo | URL, init: RequestInit = {}, timeoutMs = 15000): Promise<Response> {
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(input, { ...init, signal: controller.signal });
+  } finally {
+    window.clearTimeout(timeout);
+  }
+}
+
 const autosaveEnabled = ref(loadStorage<boolean>(STORAGE_AUTOSAVE, false));
 const storedAutosave = loadStorage<unknown>(STORAGE_LAST_AUTOSAVE, null);
 const lastAutosave = ref<AutosaveInfo | null>(isAutosaveInfo(storedAutosave) ? storedAutosave : null);
+export const sharedGoogleAccessToken = ref('');
+export const sharedGoogleDriveStatus = ref('Not connected');
+export const sharedGoogleDriveSaving = ref(false);
 
 export function recordAutosave(filename: string) {
   const payload = { filename, timestamp: new Date().toISOString() };
@@ -37,8 +50,9 @@ export function recordAutosave(filename: string) {
 
 export function useGoogleDrive2() {
   const googleClientId = ref(GOOGLE_CLIENT_ID);
-  const googleAccessToken = ref('');
-  const googleDriveStatus = ref('Not connected');
+  const googleAccessToken = sharedGoogleAccessToken;
+  const googleDriveStatus = sharedGoogleDriveStatus;
+  const googleDriveSaving = sharedGoogleDriveSaving;
   const googleTokenClient = ref<any>(null);
   const googleScriptLoaded = ref(false);
 
@@ -137,12 +151,15 @@ export function useGoogleDrive2() {
     }
   }
 
-  async function saveState(exportJson: string) {
+  async function saveState(exportJson: string, options: { silent?: boolean } = {}) {
     if (!exportJson) return false;
-    if (!googleAccessToken.value) {
-      const ok = await connectGoogleDrive();
-      if (!ok) return false;
-    }
+    googleDriveSaving.value = true;
+
+    try {
+      if (!googleAccessToken.value) {
+        const ok = await connectGoogleDrive();
+        if (!ok) return false;
+      }
 
     const metadata: any = {
       name: `counsellor-study-tracker-${new Date().toISOString().slice(0, 10)}.json`,
@@ -154,7 +171,7 @@ export function useGoogleDrive2() {
     let folderId: string | null = null;
     try {
       const q = encodeURIComponent(`name='${folderName}' and mimeType='application/vnd.google-apps.folder' and trashed=false`);
-      const listResp = await fetch(`https://www.googleapis.com/drive/v3/files?fields=files(id,name)&q=${q}`, {
+      const listResp = await fetchWithTimeout(`https://www.googleapis.com/drive/v3/files?fields=files(id,name)&q=${q}`, {
         headers: { Authorization: `Bearer ${googleAccessToken.value}` }
       });
       if (listResp.ok) {
@@ -164,7 +181,7 @@ export function useGoogleDrive2() {
       }
 
       if (!folderId) {
-        const createResp = await fetch('https://www.googleapis.com/drive/v3/files', {
+        const createResp = await fetchWithTimeout('https://www.googleapis.com/drive/v3/files', {
           method: 'POST',
           headers: {
             Authorization: `Bearer ${googleAccessToken.value}`,
@@ -189,7 +206,7 @@ export function useGoogleDrive2() {
       const fileQuery = encodeURIComponent(
         `${parentClause}name='${metadata.name}' and mimeType='application/json' and trashed=false`
       );
-      const existingResponse = await fetch(
+      const existingResponse = await fetchWithTimeout(
         `https://www.googleapis.com/drive/v3/files?fields=files(id,name)&q=${fileQuery}`,
         { headers: { Authorization: `Bearer ${googleAccessToken.value}` } }
       );
@@ -203,7 +220,7 @@ export function useGoogleDrive2() {
 
     if (existingFileId) {
       try {
-        const response = await fetch(
+        const response = await fetchWithTimeout(
           `https://www.googleapis.com/upload/drive/v3/files/${existingFileId}?uploadType=media`,
           {
             method: 'PATCH',
@@ -221,7 +238,9 @@ export function useGoogleDrive2() {
 
         googleDriveStatus.value = `Saved to Drive as ${metadata.name}`;
         persistLastAutosave(metadata.name);
-        Notify.create({ type: 'positive', message: 'Tracker state saved to Google Drive.' });
+        if (!options.silent) {
+          Notify.create({ type: 'positive', message: 'Tracker state saved to Google Drive.' });
+        }
         return true;
       } catch (error) {
         googleDriveStatus.value = 'Save failed';
@@ -243,15 +262,14 @@ export function useGoogleDrive2() {
       exportJson +
       closeDelimiter;
 
-    try {
-      const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${googleAccessToken.value}`,
-          'Content-Type': `multipart/related; boundary=${boundary}`
-        },
-        body: multipartRequestBody
-      });
+    const response = await fetchWithTimeout('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${googleAccessToken.value}`,
+        'Content-Type': `multipart/related; boundary=${boundary}`
+      },
+      body: multipartRequestBody
+    });
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -264,13 +282,17 @@ export function useGoogleDrive2() {
       const result = await response.json();
       googleDriveStatus.value = `Saved to Drive as ${result.name}`;
       persistLastAutosave(result.name);
-      Notify.create({ type: 'positive', message: 'Tracker state saved to Google Drive.' });
+      if (!options.silent) {
+        Notify.create({ type: 'positive', message: 'Tracker state saved to Google Drive.' });
+      }
       return true;
     } catch (error) {
       googleDriveStatus.value = 'Save failed';
       Notify.create({ type: 'negative', message: 'Could not save tracker state to Google Drive.' });
       console.error(error);
       return false;
+    } finally {
+      googleDriveSaving.value = false;
     }
   }
 
@@ -278,6 +300,7 @@ export function useGoogleDrive2() {
     googleClientId,
     googleAccessToken,
     googleDriveStatus,
+    googleDriveSaving,
     lastAutosave,
     autosaveEnabled,
     connectGoogleDrive,

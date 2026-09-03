@@ -1,7 +1,7 @@
 <template>
   <div class="q-gutter-md">
     <div class="row q-gutter-md q-mt-sm">
-      <div class="col-auto">
+      <div class="col-auto" v-if="showConnect">
         <q-btn
           :label="primaryButtonLabel"
           color="teal"  
@@ -57,7 +57,11 @@
 <script setup lang="ts">
 import { computed, defineEmits, defineProps, ref, defineExpose } from 'vue';
 import { Notify } from 'quasar';
-import { recordAutosave } from '@/composables/useGoogleDrive2';
+import {
+  recordAutosave,
+  sharedGoogleAccessToken,
+  sharedGoogleDriveStatus
+} from '@/composables/useGoogleDrive2';
 
 interface GoogleDriveFile {
   id: string;
@@ -75,6 +79,10 @@ const props = defineProps({
     default: true
   },
   showLoad: {
+    type: Boolean,
+    default: true
+  },
+  showConnect: {
     type: Boolean,
     default: true
   },
@@ -98,8 +106,8 @@ const emit = defineEmits<{
 }>();
 
 const googleClientId = ref('843769116026-r3e0ati85aecv5v505318oc67olakm8r.apps.googleusercontent.com');
-const googleAccessToken = ref('');
-const googleDriveStatus = ref('Not connected');
+const googleAccessToken = sharedGoogleAccessToken;
+const googleDriveStatus = sharedGoogleDriveStatus;
 const googleTokenClient = ref<any>(null);
 const googleScriptLoaded = ref(false);
 const showDriveFilePicker = ref(false);
@@ -390,5 +398,5 @@ async function handlePrimaryAction() {
 }
 
 // expose save for parent components
-defineExpose({ saveStateToDrive, connectGoogleDrive });
+defineExpose({ saveStateToDrive, connectGoogleDrive, loadFromGoogleDrive });
 </script>

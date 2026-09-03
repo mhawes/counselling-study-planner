@@ -23,13 +23,20 @@
         </div>
         <div class="row q-gutter-md q-mt-sm">
           <div class="col-12 col-md-6">
-            <q-btn flat label="Connect to Drive" color="primary" @click="connectToDrive" class="full-width" />
+            <q-btn flat label="Load from Google Drive" color="primary" @click="loadFromDrive" class="full-width" />
           </div>
           <div class="col-12 col-md-6">
             <q-btn flat label="Continue with empty model" color="secondary" @click="store.continueWithEmptyModel" class="full-width" />
           </div>
         </div>
         <input ref="fileInput" type="file" accept=".json,application/json" @change="onFileSelected" style="display:none" />
+        <GoogleDriveConnector
+          ref="driveConnector"
+          :showSave="false"
+          :showLoad="false"
+          :showConnect="false"
+          @fileLoaded="handleDriveFileLoaded"
+        />
       </q-card-section>
     </q-card>
   </q-dialog>
@@ -65,6 +72,8 @@ import type { CourseSchema } from '@/types';
 import { defaultCourse } from '@/data/defaultCourse';
 import { CbcabLevel4_2025_2027 } from '@/data/CbcabLevel4_2025_2027';
 import { useCourseStore } from '@/composables/useCourseStore';
+import GoogleDriveConnector from '@/components/GoogleDriveConnector.vue';
+import { notifyExportStateChanged } from '@/composables/useTrackerExport';
 
 const store = useCourseStore();
 const { welcomeDialogVisible } = store;
@@ -72,6 +81,7 @@ const selectedDefaultCourseId = ref<string | null>(null);
 const confirmImportDialogVisible = ref(false);
 const pendingImport = ref<{ data: CourseSchema; label: string; hasCriteria: boolean } | null>(null);
 const fileInput = ref<HTMLInputElement | null>(null);
+const driveConnector = ref<InstanceType<typeof GoogleDriveConnector> | null>(null);
 
 const defaultCourseSets = [
   {
@@ -92,12 +102,42 @@ function triggerFileInput() {
   fileInput.value?.click();
 }
 
-function connectToDrive() {
-  Notify.create({
-    type: 'info',
-    message: 'Google Drive import is not available from this dialog yet. Use the file picker to load a JSON file from a connected drive.'
-  });
-  triggerFileInput();
+function loadFromDrive() {
+  void driveConnector.value?.loadFromGoogleDrive();
+}
+
+function handleDriveFileLoaded(payload: unknown) {
+  if (!payload || typeof payload !== 'object') {
+    Notify.create({ type: 'negative', message: 'The selected Drive file is not a valid tracker export.' });
+    return;
+  }
+
+  const imported = payload as Record<string, unknown>;
+  const course = imported.course;
+  if (isValidCourseSchema(course)) {
+    const keys = ['sessions', 'supervisionNotes', 'agencies', 'clients', 'glossaryEntries'] as const;
+    const storageKeys = ['placement-sessions', 'placement-supervision', 'placement-agencies', 'placement-clients', 'glossary-entries'];
+    keys.forEach((key, index) => {
+      const value = Array.isArray(imported[key]) ? imported[key] : [];
+      localStorage.setItem(storageKeys[index], JSON.stringify(value));
+    });
+    store.replaceCourse(course);
+    notifyExportStateChanged();
+    Notify.create({ type: 'positive', message: 'Tracker data loaded from Google Drive.' });
+    return;
+  }
+
+  if (isValidCourseSchema(payload)) {
+    pendingImport.value = {
+      data: payload,
+      label: `${payload.courseTitle || 'Untitled course'} (${payload.courseCode || 'Unknown code'} ${payload.courseYear || ''})`,
+      hasCriteria: payload.units.some((unit) => unit.sections.some((section) => section.criteria.length > 0))
+    };
+    confirmImportDialogVisible.value = true;
+    return;
+  }
+
+  Notify.create({ type: 'negative', message: 'The selected Drive file does not contain valid tracker data.' });
 }
 
 function loadDefaultCourse() {
