@@ -96,7 +96,7 @@ const emit = defineEmits<{
   (e: 'saved', message: string): void;
 }>();
 
-const googleClientId = ref('123');
+const googleClientId = ref('843769116026-r3e0ati85aecv5v505318oc67olakm8r.apps.googleusercontent.com');
 const googleAccessToken = ref('');
 const googleDriveStatus = ref('Not connected');
 const googleTokenClient = ref<any>(null);

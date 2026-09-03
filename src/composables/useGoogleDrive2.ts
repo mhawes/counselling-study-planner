@@ -2,7 +2,7 @@ import { ref } from 'vue';
 import { Notify } from 'quasar';
 
 const STORAGE_LAST_AUTOSAVE = 'google-drive-last-autosave';
-const GOOGLE_CLIENT_ID = '123';
+const GOOGLE_CLIENT_ID = '843769116026-r3e0ati85aecv5v505318oc67olakm8r.apps.googleusercontent.com';
 
 function loadStorage<T>(key: string, fallback: T): T {
   try {
