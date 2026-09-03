@@ -191,6 +191,14 @@
                 <q-btn
                   dense
                   flat
+                  icon-right="note_add"
+                  color="primary"
+                  aria-label="Add note for client"
+                  @click="openSessionDialogForClient(props.row)"
+                />
+                <q-btn
+                  dense
+                  flat
                   icon="edit"
                   color="primary"
                   @click="openClientDialog(props.row)"
@@ -210,7 +218,7 @@
       </q-card-section>
     </q-card>
 
-    <q-dialog v-model="showClientTimelineDialog">
+    <q-dialog v-model="showClientTimelineDialog" :maximized="true">
       <q-card style="width: 700px; max-width: 90vw">
         <q-card-section>
           <div class="text-h6">
@@ -222,7 +230,7 @@
           <div v-if="clientTimeline.length === 0" class="text-grey">
             No session or supervision notes recorded for this client.
           </div>
-          <q-timeline v-else color="primary" layout="loose">
+          <q-timeline v-else color="primary">
             <q-timeline-entry
               v-for="event in clientTimeline"
               :key="event.id"
@@ -1142,6 +1150,11 @@ function openSessionDialog(session?: PlacementSession) {
     });
   }
   showSessionDialog.value = true;
+}
+
+function openSessionDialogForClient(client: Client) {
+  openSessionDialog();
+  editingSession.clientId = client.id;
 }
 
 function openSupervisionDialog(note?: SupervisionNote) {
