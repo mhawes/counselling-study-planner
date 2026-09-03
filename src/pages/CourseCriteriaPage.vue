@@ -42,7 +42,7 @@
                 <div class="text-subtitle2">Overall progress</div>
                 <q-linear-progress :value="overallProgressValue" color="primary" track-color="grey-3" />
               </div>
-              <div class="col-auto">
+              <div class="col-1">
                 <div class="text-subtitle2">{{ totalCountedClaims }} / {{ totalRequiredClaims }} ({{ Math.round(overallProgressValue * 100) }}%)</div>
               </div>
             </div>
@@ -52,7 +52,7 @@
                 <div class="text-subtitle2">Units Complete</div>
                 <q-linear-progress :value="course.units.filter(unitComplete).length / course.units.length" color="secondary" track-color="grey-3" />
               </div>
-              <div class="col-auto">
+              <div class="col-1">
                 <div class="text-subtitle2">{{ course.units.filter(unitComplete).length }} / {{ course.units.length }} ({{ Math.round((course.units.filter(unitComplete).length / course.units.length) * 100) }}%)</div> 
               </div>
             </div>
@@ -62,7 +62,7 @@
                 <div class="text-subtitle2">Sections Complete</div>
                 <q-linear-progress :value="course.units.reduce((acc, unit) => acc + unit.sections.filter(sectionComplete).length, 0) / course.units.reduce((acc, unit) => acc + unit.sections.length, 0)" color="accent" track-color="grey-3" />
               </div>
-              <div class="col-auto">
+              <div class="col-1">
                 <div class="text-subtitle2">{{ course.units.reduce((acc, unit) => acc + unit.sections.filter(sectionComplete).length, 0) }} / {{ course.units.reduce((acc, unit) => acc + unit.sections.length, 0) }} ({{ Math.round((course.units.reduce((acc, unit) => acc + unit.sections.filter(sectionComplete).length, 0) / course.units.reduce((acc, unit) => acc + unit.sections.length, 0)) * 100) }}%)</div>
               </div>
             </div>
@@ -73,10 +73,10 @@
       <q-card-section>
         <div class="text-subtitle2 q-mb-sm">Filter criteria</div>
         <div class="row q-gutter-sm items-center">
-          <div class="col-12 col-sm-6 col-md-3">
+          <div class="col">
             <q-input v-model="searchQuery" label="Search criteria" dense clearable prepend-icon="search" />
           </div>
-          <div class="col-12 col-sm-6 col-md-3">
+          <div class="col">
             <q-select
               v-model="selectedUnitIds"
               :options="unitOptions"
@@ -88,7 +88,7 @@
               map-options
             />
           </div>
-          <div class="col-12 col-sm-6 col-md-3">
+          <div class="col">
             <q-select
               v-model="selectedWorkEvidence"
               :options="workEvidenceOptions"
@@ -99,8 +99,8 @@
               map-options
             />
           </div>
-          <div class="col-12 col-sm-6 col-md-3">
-            <q-toggle v-model="showIncompleteOnly" label="Show incomplete only" dense />
+          <div class="col">
+            <q-toggle v-model="showIncompleteOnly" label="Show incomplete" dense />
           </div>
         </div>
       </q-card-section>
@@ -118,8 +118,8 @@
                 <div class="text-caption">{{ unit.sections.length }} section(s)</div>
               </div>
               <div class="col-auto">
-                <q-chip :color="unitComplete(unit) ? 'positive' : 'warning'" text-color="white">
-                  {{ unitComplete(unit) ? 'Complete' : 'Incomplete' }}
+                <q-chip :color="unitComplete(courseUnit(unit.id)) ? 'positive' : 'warning'" text-color="white">
+                  {{ unitComplete(courseUnit(unit.id)) ? 'Complete' : 'Incomplete' }}
                 </q-chip>
               </div>
             </q-card-section>
@@ -127,10 +127,10 @@
             <q-card-section v-if="perTypeScope === 'unit'">
               <div class="row q-gutter-md">
                 <div class="col-9 col-md-3" v-for="source in requiredSources" :key="source">
-                  <q-banner :color="unitSourceCount(unit, source) >= (course.rules?.perType?.counts?.[source] ?? 0) ? 'positive' : 'grey-3'" class="q-pa-sm">
+                  <q-banner :color="unitSourceCount(courseUnit(unit.id), source) >= (course.rules?.perType?.counts?.[source] ?? 0) ? 'positive' : 'grey-3'" class="q-pa-sm">
                     <div class="text-body2">{{ source }}</div>
-                    <q-chip :color="unitSourceCount(unit, source) >= (course.rules?.perType?.counts?.[source] ?? 0) ? getClaimSourceColour(source) : 'grey-9'" text-color="white">
-                      {{ unitSourceCount(unit, source) }} / {{ course.rules?.perType?.counts?.[source] ?? 0 }} required
+                    <q-chip :color="unitSourceCount(courseUnit(unit.id), source) >= (course.rules?.perType?.counts?.[source] ?? 0) ? getClaimSourceColour(source) : 'grey-9'" text-color="white">
+                      {{ unitSourceCount(courseUnit(unit.id), source) }} / {{ course.rules?.perType?.counts?.[source] ?? 0 }} required
                     </q-chip>
                   </q-banner>
                 </div>
@@ -144,10 +144,10 @@
                 <div v-if="perTypeScope === 'section'">
                   <div class="row q-gutter-md q-mt-xs">
                     <div class="col-9 col-md-3" v-for="source in requiredSources" :key="source + section.id">
-                      <q-banner :color="sectionSourceCount(section, source) >= (course.rules?.perType?.counts?.[source] ?? 0) ? 'positive' : 'grey-3'" class="q-pa-sm">
+                      <q-banner :color="sectionSourceCount(courseSection(unit.id, section.id), source) >= (course.rules?.perType?.counts?.[source] ?? 0) ? 'positive' : 'grey-3'" class="q-pa-sm">
                         <div class="text-body2">{{ source }}</div>
-                        <q-chip :color="sectionSourceCount(section, source) >= (course.rules?.perType?.counts?.[source] ?? 0) ?  getClaimSourceColour(source) : 'grey-3'" text-color="white">
-                          {{ sectionSourceCount(section, source) }} / {{ course.rules?.perType?.counts?.[source] ?? 0 }} required
+                        <q-chip :color="sectionSourceCount(courseSection(unit.id, section.id), source) >= (course.rules?.perType?.counts?.[source] ?? 0) ?  getClaimSourceColour(source) : 'grey-3'" text-color="white">
+                          {{ sectionSourceCount(courseSection(unit.id, section.id), source) }} / {{ course.rules?.perType?.counts?.[source] ?? 0 }} required
                         </q-chip>
                       </q-banner>
                     </div>
@@ -780,6 +780,22 @@ function removeClaim(unitId: string, sectionId: string, criterionId: string, cla
 
 function unitSourceCount(unit: Unit, source: ClaimSource) {
   return unit.sections.reduce((count, section) => count + section.criteria.reduce((sectionCount, criterion) => sectionCount + criterion.claims.filter((claim) => claim.source === source).length, 0), 0);
+}
+
+function courseUnit(unitId: string) {
+  const unit = course.units.find((candidate) => candidate.id === unitId);
+  if (!unit) {
+    throw new Error(`Unit ${unitId} was not found in the course model.`);
+  }
+  return unit;
+}
+
+function courseSection(unitId: string, sectionId: string) {
+  const section = courseUnit(unitId).sections.find((candidate) => candidate.id === sectionId);
+  if (!section) {
+    throw new Error(`Section ${sectionId} was not found in unit ${unitId}.`);
+  }
+  return section;
 }
 
 function sectionSourceCount(section: Unit['sections'][0], source: ClaimSource) {
