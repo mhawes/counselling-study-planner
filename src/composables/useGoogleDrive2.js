@@ -1,7 +1,7 @@
 import { ref } from 'vue';
 import { Notify } from 'quasar';
-const STORAGE_GOOGLE_CLIENT_ID = 'google-drive-client-id';
 const STORAGE_LAST_AUTOSAVE = 'google-drive-last-autosave';
+const GOOGLE_CLIENT_ID = '123';
 function loadStorage(key, fallback) {
     try {
         const raw = localStorage.getItem(key);
@@ -12,7 +12,7 @@ function loadStorage(key, fallback) {
     }
 }
 export function useGoogleDrive2() {
-    const googleClientId = ref(loadStorage(STORAGE_GOOGLE_CLIENT_ID, ''));
+    const googleClientId = ref(GOOGLE_CLIENT_ID);
     const googleAccessToken = ref('');
     const googleDriveStatus = ref('Not connected');
     const googleTokenClient = ref(null);

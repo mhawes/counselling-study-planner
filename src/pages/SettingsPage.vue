@@ -45,7 +45,6 @@
                   :exportJson="exportJson"
                   :showSave="true"
                   :showLoad="true"
-                  :showClientIdInput="true"
                   @fileLoaded="handleDriveFileLoaded"
                 />
               </div>

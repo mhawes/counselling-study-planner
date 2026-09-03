@@ -1,15 +1,5 @@
 <template>
   <div class="q-gutter-md">
-    <div v-if="showClientIdInput" class="q-mb-md">
-      <q-input
-        v-model="googleClientId"
-        label="Google OAuth client ID"
-        dense
-        outlined
-        hint="Paste your Google client ID to enable Drive sync"
-      />
-    </div>
-
     <div class="row q-gutter-md q-mt-sm">
       <div class="col-auto">
         <q-btn
@@ -65,7 +55,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineEmits, defineProps, ref, watch, onMounted, defineExpose } from 'vue';
+import { computed, defineEmits, defineProps, ref, defineExpose } from 'vue';
 import { Notify } from 'quasar';
 
 interface GoogleDriveFile {
@@ -84,10 +74,6 @@ const props = defineProps({
     default: true
   },
   showLoad: {
-    type: Boolean,
-    default: true
-  },
-  showClientIdInput: {
     type: Boolean,
     default: true
   },
@@ -110,18 +96,7 @@ const emit = defineEmits<{
   (e: 'saved', message: string): void;
 }>();
 
-const STORAGE_GOOGLE_CLIENT_ID = '843769116026-r3e0ati85aecv5v505318oc67olakm8r.apps.googleusercontent.com';
-
-function loadStorage<T>(key: string, fallback: T): T {
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? (JSON.parse(raw) as T) : fallback;
-  } catch {
-    return fallback;
-  }
-}
-
-const googleClientId = ref(props.showClientIdInput ? loadStorage<string>(STORAGE_GOOGLE_CLIENT_ID, '') : '');
+const googleClientId = ref('123');
 const googleAccessToken = ref('');
 const googleDriveStatus = ref('Not connected');
 const googleTokenClient = ref<any>(null);
@@ -131,12 +106,6 @@ const googleDriveFiles = ref<GoogleDriveFile[]>([]);
 const selectedDriveFileId = ref('');
 let googleAuthResolver: (() => void) | null = null;
 let googleAuthRejecter: ((reason?: Error) => void) | null = null;
-
-watch(googleClientId, (value) => {
-  if (props.showClientIdInput) {
-    localStorage.setItem(STORAGE_GOOGLE_CLIENT_ID, JSON.stringify(value));
-  }
-});
 
 const canConnectToGoogle = computed(() => googleClientId.value !== '' && !googleClientId.value.includes('REPLACE'));
 
