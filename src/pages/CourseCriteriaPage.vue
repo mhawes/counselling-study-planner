@@ -84,7 +84,6 @@
               dense
               multiple
               use-chips
-              clearable
               emit-value
               map-options
             />

@@ -78,7 +78,7 @@
                 <div><strong>{{ courseUnits }}</strong></div>
               </div>
               <div class="col-12 q-mt-md">
-                <ButtonWithConfirmation label="Clear model and start over" confirm-message="This will clear your current course model and all associated data. Are you sure?" @confirm="resetModel" />
+                <ButtonWithConfirmation label="Clear model and start over" color="negative" confirm-message="This will clear your current course model and all associated data. Are you sure?" @confirm="resetModel" />
               </div>
             </div>
           </q-card-section>
