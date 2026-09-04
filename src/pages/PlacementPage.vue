@@ -51,7 +51,7 @@
 
     <q-card v-if="activeView === 'overview'">
       <q-card-section>
-        <div class="text-h6">Overview</div>
+        <div class="text-h6">Placement Overview</div>
       </q-card-section>
       <q-separator />
       <q-card-section>

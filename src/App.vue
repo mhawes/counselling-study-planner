@@ -29,8 +29,8 @@
         </div>
 
         <q-btn-group flat dense>
-          <q-btn v-if="hasPlacement" flat dense to="/placement" icon="home" label="Placement" color="white" class="q-mx-xs" />
           <q-btn flat dense to="/course-criteria" icon="school" label="Criteria" color="white" class="q-mx-xs" />
+          <q-btn v-if="hasPlacement" flat dense to="/placement" icon="home" label="Placement" color="white" class="q-mx-xs" />
           <q-btn flat dense to="/glossary" icon="menu_book" label="Glossary" color="white" class="q-mx-xs" />
           <q-btn flat dense to="/settings" icon="settings" color="white" class="q-mx-xs" />
         </q-btn-group>

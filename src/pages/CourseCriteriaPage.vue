@@ -53,7 +53,7 @@
           <q-item-section avatar>
             <q-icon name="dashboard" />
           </q-item-section>
-          <q-item-section class="text-weight-medium">Overview</q-item-section>
+          <q-item-section class="text-weight-medium">Course Criteria Overview</q-item-section>
         </q-item>
         <q-separator class="q-my-sm" />
         <q-item
@@ -140,6 +140,12 @@
             </div>
           </q-card-section>
         </q-card>
+
+        <div class="row justify-center q-mt-md">
+          <div class="col-auto">
+            <q-btn flat color="primary" label="View Criteria" @click="selectNavigationItem(navigationItems[1]?.value || 'overview')" />
+          </div>
+        </div>
       </div>
 
       <div v-else>
