@@ -1,9 +1,8 @@
 <template>
   <q-dialog v-model="welcomeDialogVisible" persistent>
-    <q-card style="min-width: 560px; max-width: 760px;">
+    <q-card>
       <q-card-section>
         <div class="text-h6">Welcome to the Counsellor Study Tracker</div>
-        <div class="text-caption">Start by choosing a default criteria set, importing a saved criteria JSON file, or continue with an empty model.</div>
       </q-card-section>
       <q-separator />
       <q-card-section>
@@ -13,28 +12,18 @@
           :options="defaultCourseOptions"
           type="radio"
         />
-        <div class="row q-gutter-md q-mt-md justify-center">
-          <div class="col-12 col-md-auto flex flex-center">
-            <q-btn unelevated label="Load selected set" color="primary" :disable="!selectedDefaultCourseId" @click="loadDefaultCourse" class="welcome-dialog-button" />
-          </div>
-          <div class="col-12 col-md-auto flex flex-center">
-            <q-btn outlined label="Import criteria JSON" color="secondary" @click="triggerFileInput" class="welcome-dialog-button" />
-          </div>
-        </div>
-        <div class="row q-gutter-md q-mt-sm justify-center">
-          <div class="col-12 col-md-auto flex flex-center">
-            <q-btn flat label="Load from Google Drive" color="primary" @click="loadFromDrive" class="welcome-dialog-button" />
-          </div>
-          <div class="col-12 col-md-auto flex flex-center">
-            <q-btn flat label="Continue with empty model" color="secondary" @click="store.continueWithEmptyModel" class="welcome-dialog-button" />
-          </div>
-        </div>
+        <q-btn label="Load selected set" color="primary" :disable="!selectedDefaultCourseId" @click="loadDefaultCourse" />
+      </q-card-section>
+      <q-card-section>
+        <div class="text-subtitle2 q-mb-sm">Or load a file previously saved to Google Drive</div>
+        <q-btn label="Load from Google Drive" color="secondary" @click="loadFromDrive" />
         <input ref="fileInput" type="file" accept=".json,application/json" @change="onFileSelected" style="display:none" />
         <GoogleDriveConnector
           ref="driveConnector"
           :showSave="false"
           :showLoad="false"
           :showConnect="false"
+          :show-status="false"
           @fileLoaded="handleDriveFileLoaded"
         />
       </q-card-section>
@@ -253,7 +242,4 @@ function isValidCourseSchema(obj: unknown): obj is CourseSchema {
 </script>
 
 <style scoped>
-.welcome-dialog-button {
-  min-width: 220px;
-}
 </style>

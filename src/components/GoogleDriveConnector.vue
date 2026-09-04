@@ -19,7 +19,7 @@
       </div>
     </div>
 
-    <div class="q-mt-md">
+    <div v-if="showStatus" class="q-mt-md">
       <div class="text-caption q-mb-xs">Google Drive status:</div>
       <q-banner :color="googleAccessToken ? 'positive' : 'grey-3'" class="q-pa-sm">
         {{ googleDriveStatus }}
@@ -83,6 +83,10 @@ const props = defineProps({
     default: true
   },
   showConnect: {
+    type: Boolean,
+    default: true
+  },
+  showStatus: {
     type: Boolean,
     default: true
   },

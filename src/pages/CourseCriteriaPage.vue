@@ -12,8 +12,9 @@
       icon="add"
       active-icon="close"
       color="primary"
-      direction="down"
+      direction="up"
       label="Actions"
+      :hide-label="$q.screen.lt.md"
       vertical-actions-align="right"
     >
       <q-fab-action
@@ -474,7 +475,7 @@
 .course-actions-fab {
   position: fixed;
   right: 24px;
-  top: 90px;
+  bottom: 24px;
   z-index: 2000;
 }
 

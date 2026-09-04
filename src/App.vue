@@ -28,13 +28,59 @@
           </q-btn>
         </div>
 
-        <q-btn-group flat dense>
+        <q-btn-group v-if="!$q.screen.lt.md" flat dense>
           <q-btn flat dense to="/course-criteria" icon="school" label="Criteria" color="white" class="q-mx-xs" />
           <q-btn v-if="hasPlacement" flat dense to="/placement" icon="home" label="Placement" color="white" class="q-mx-xs" />
           <q-btn flat dense to="/glossary" icon="menu_book" label="Glossary" color="white" class="q-mx-xs" />
           <q-btn flat dense to="/settings" icon="settings" color="white" class="q-mx-xs" />
         </q-btn-group>
+
+        <q-btn-dropdown
+          v-else
+          flat
+          dense
+          dropdown-icon="menu"
+          color="white"
+          class="q-ml-sm"
+          aria-label="Open navigation menu"
+        >
+          <q-list style="min-width: 180px;">
+            <q-item clickable v-ripple to="/course-criteria">
+              <q-item-section avatar><q-icon name="school" /></q-item-section>
+              <q-item-section>Criteria</q-item-section>
+            </q-item>
+            <q-item v-if="hasPlacement" clickable v-ripple to="/placement">
+              <q-item-section avatar><q-icon name="home" /></q-item-section>
+              <q-item-section>Placement</q-item-section>
+            </q-item>
+            <q-item clickable v-ripple to="/glossary">
+              <q-item-section avatar><q-icon name="menu_book" /></q-item-section>
+              <q-item-section>Glossary</q-item-section>
+            </q-item>
+            <q-item clickable v-ripple to="/settings">
+              <q-item-section avatar><q-icon name="settings" /></q-item-section>
+              <q-item-section>Settings</q-item-section>
+            </q-item>
+            <q-separator />
+            <q-item tag="label" v-ripple>
+              <q-item-section avatar>
+                <q-icon :name="isDark ? 'dark_mode' : 'light_mode'" />
+              </q-item-section>
+              <q-item-section>Dark mode</q-item-section>
+              <q-item-section side>
+                <q-toggle
+                  v-model="isDark"
+                  dense
+                  color="primary"
+                  keep-color
+                />
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </q-btn-dropdown>
+
         <q-toggle
+          v-if="!$q.screen.lt.md"
           dense
           left-label
           v-model="isDark"

@@ -49,9 +49,61 @@
       />
     </div>
 
+    <q-fab
+      class="placement-actions-fab"
+      icon="add"
+      active-icon="close"
+      color="primary"
+      direction="up"
+      label="Actions"
+      :hide-label="$q.screen.lt.md"
+      vertical-actions-align="right"
+    >
+      <q-fab-action
+        color="primary"
+        icon="business"
+        label="Add agency"
+        @click="openAgencyDialog()"
+      />
+      <q-fab-action
+        color="secondary"
+        icon="people"
+        label="Add client"
+        @click="openClientDialog()"
+      />
+      <q-fab-action
+        color="accent"
+        icon="edit_note"
+        label="Add session note"
+        @click="openSessionDialog()"
+      />
+      <q-fab-action
+        color="deep-purple"
+        icon="supervised_user_circle"
+        label="Add supervision note"
+        @click="openSupervisionDialog()"
+      />
+    </q-fab>
+
     <q-card v-if="activeView === 'overview'">
       <q-card-section>
-        <div class="text-h6">Placement Overview</div>
+        <div class="col">
+          <div class="text-h5">Placement Overview</div>
+          <div class="text-subtitle2">Use this page to record your placement hours.</div>
+          <div v-if="clients.length === 0">
+            <div class="text-subtitle1">Start by adding your <q-btn
+              dense
+              color="primary"
+              label="Agency"
+              @click="openAgencyDialog()"/>
+            and then add a <q-btn
+              dense
+              color="secondary"
+              label="Client"
+              @click="openClientDialog()"/>
+            </div>
+          </div>
+        </div>
       </q-card-section>
       <q-separator />
       <q-card-section>
@@ -789,6 +841,13 @@
   min-height: 200px;
   width: 100%;
   display: block;
+}
+
+.placement-actions-fab {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 2000;
 }
 
 /* Make sure the internal scroll container has some padding so timeline entries aren't cramped */

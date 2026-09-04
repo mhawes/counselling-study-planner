@@ -4,9 +4,9 @@ import CourseCriteriaPage from '@/pages/CourseCriteriaPage.vue';
 import GlossaryPage from '@/pages/GlossaryPage.vue';
 import SettingsPage from '@/pages/SettingsPage.vue';
 const routes = [
-    { path: '/', redirect: '/placement' },
-    { path: '/placement', component: PlacementPage },
+    { path: '/', redirect: '/course-criteria' },
     { path: '/course-criteria', component: CourseCriteriaPage },
+    { path: '/placement', component: PlacementPage },
     { path: '/glossary', component: GlossaryPage },
     { path: '/settings', component: SettingsPage }
 ];
