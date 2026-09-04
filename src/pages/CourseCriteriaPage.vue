@@ -348,7 +348,7 @@
     </q-dialog>
 
     <q-dialog v-model="submitWorkDialogVisible" persistent>
-      <q-card style="min-width: 480px;">
+      <q-card>
         <q-card-section>
           <div class="text-h6">Submit Work for Multiple Criteria</div>
           <div class="text-caption">Enter the work details and select the criteria to attach this claim to.</div>
@@ -406,9 +406,8 @@
       </q-card>
     </q-dialog>
 
-
     <q-dialog v-model="submittedWorkDialogVisible" persistent>
-      <q-card style="min-width: 640px; max-width: 900px;">
+      <q-card>
         <q-card-section class="row items-center q-gutter-sm">
           <div class="col">
             <div class="text-h6">Submitted work overview</div>

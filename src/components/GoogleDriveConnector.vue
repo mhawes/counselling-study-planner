@@ -27,7 +27,7 @@
     </div>
 
     <q-dialog v-model="showDriveFilePicker" persistent>
-      <q-card style="min-width: 480px;">
+      <q-card>
         <q-card-section>
           <div class="text-h6">Choose a tracker JSON file</div>
           <div class="text-caption">Select a JSON file from Google Drive to reload the tracker data.</div>

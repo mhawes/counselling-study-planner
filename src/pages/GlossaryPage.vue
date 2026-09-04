@@ -52,7 +52,7 @@
       </q-card-section>
 
       <q-dialog v-model="entryDialog" persistent>
-        <q-card style="min-width: 420px;">
+        <q-card>
           <q-card-section>
             <div class="text-h6">{{ editingEntry.id ? 'Edit' : 'Add' }} glossary term</div>
           </q-card-section>
@@ -71,7 +71,7 @@
       </q-dialog>
 
       <q-dialog v-model="deleteTermDialog" persistent>
-        <q-card style="min-width: 400px;">
+        <q-card>
           <q-card-section>
             <div class="text-h6">Confirm deletion</div>
           </q-card-section>
@@ -87,7 +87,7 @@
       </q-dialog>
 
       <q-dialog v-model="subtermDialog" persistent>
-        <q-card style="min-width: 400px;">
+        <q-card>
           <q-card-section>
             <div class="text-h6">{{ subtermContext.editingId ? 'Edit' : 'Add' }} sub-term</div>
           </q-card-section>

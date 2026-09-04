@@ -31,7 +31,7 @@
   </q-dialog>
 
   <q-dialog v-model="confirmImportDialogVisible" persistent>
-    <q-card style="min-width: 480px;">
+    <q-card>
       <q-card-section>
         <div class="text-h6">Confirm course import</div>
         <div class="text-caption">Review the import details before overwriting your current model.</div>

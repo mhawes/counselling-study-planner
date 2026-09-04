@@ -10,7 +10,7 @@
       @click="dialog = true"
     />
     <q-dialog v-model="dialog" persistent>
-      <q-card style="min-width: 320px;">
+      <q-card style="min-width: 120px;">
         <q-card-section>
           <div v-if="title" class="text-h6">{{ title }}</div>
           <div class="text">{{ confirmMessage }}</div>
