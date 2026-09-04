@@ -262,7 +262,7 @@
                               </ul>
                             </div>
                             <div class="col-auto">
-                              <q-btn dense flat color="primary" icon="add" label="Add claim" @click="openClaimDialog(unit.id, section.id, criterion)" />
+                              <q-btn dense color="primary" icon="add" label="Add claim" @click="openClaimDialog(unit.id, section.id, criterion)" />
                             </div>
                           </div>
                         </div>
