@@ -10,7 +10,7 @@
           <q-chip dense outline text-color="white" color="white" v-if="autosaveEnabled && (googleDriveSaving || lastAutosaveDate)">
             <template #default>
               <span v-if="googleDriveSaving">Saving to Google Drive...</span>
-              <span v-else>Last autosave: {{ lastAutosaveDate.toLocaleString() }}</span>
+              <span v-else>Last autosave: {{ lastAutosaveDate ? formatDisplayDate(lastAutosaveDate, '', true) : '' }}</span>
             </template>
           </q-chip>
           <q-btn
@@ -54,6 +54,7 @@
 
 <script setup lang="ts">
 import { computed, ref, onMounted, watch } from 'vue';
+import { formatDisplayDate } from '@/utils/formatDate';
 import { useQuasar } from 'quasar';
 import WelcomeDialog from '@/components/WelcomeDialog.vue';
 import { useCourseStore } from '@/composables/useCourseStore';

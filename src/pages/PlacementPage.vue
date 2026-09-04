@@ -251,7 +251,7 @@
                 v-for="event in clientTimeline"
                 :key="event.id"
                 :title="event.title"
-                :subtitle="event.date || 'No date'"
+                :subtitle="formatDisplayDate(event.date, 'No date')"}
                 :icon="event.icon"
                 :color="event.color"
               >
@@ -341,7 +341,7 @@
                   <q-chip color="warning" text-color="white" size="sm">IMPORTANT</q-chip>
                 </div>
                 <div class="text-caption">
-                  {{ session.date || "No date" }} • {{ session.duration }} h
+                  {{ formatDisplayDate(session.date, 'No date') }} • {{ session.duration }} h
                 </div>
                 <div class="q-mt-xs">
                   <strong>What happened:</strong>
@@ -411,7 +411,7 @@
             >
               <q-item-section>
                 <div class="text-subtitle1">
-                  {{ note.supervisorName }} on {{ note.date || "No date" }}
+                  {{ note.supervisorName }} on {{ formatDisplayDate(note.date, 'No date') }}
                 </div>
                 <div class="text-caption">
                   Duration: {{ note.duration }} h • Clients:
@@ -799,6 +799,7 @@
 
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from "vue";
+import { formatDisplayDate } from '@/utils/formatDate';
 import { Notify, useQuasar } from "quasar";
 import type {
   PlacementSession,
@@ -1316,6 +1317,11 @@ function saveClient() {
 }
 
 function saveSession() {
+  if (!editingSession.date) {
+    Notify.create({ type: "negative", message: "Session date is required." });
+    return;
+  }
+
   if (!editingSession.clientId || !editingSession.agencyId) {
     Notify.create({
       type: "negative",
@@ -1338,6 +1344,11 @@ function saveSession() {
 }
 
 function saveSupervision() {
+  if (!editingSupervision.date) {
+    Notify.create({ type: "negative", message: "Supervision date is required." });
+    return;
+  }
+
   if (!editingSupervision.supervisorName.trim()) {
     Notify.create({
       type: "negative",

@@ -263,6 +263,11 @@
                         <div v-if="criterion.claims.length === 0" class="text-grey">No claims recorded for this criterion yet.</div>
                         <div v-else>
                           <q-table :rows="criterion.claims" :columns="claimColumns" row-key="id" flat dense>
+                            <template #body-cell-claimDate="props">
+                              <q-td :props="props" align="center">
+                                {{ formatDisplayDate(props.row.claimDate, 'Not recorded') }}
+                              </q-td>
+                            </template>
                             <template #body-cell-source="props">
                               <q-td :props="props" align="center">
                                 <q-chip :color="getClaimSourceColour(props.row.source)" text-color="white">{{props.row.source}}</q-chip>
@@ -428,7 +433,7 @@
                 <div class="row q-gutter-sm q-mt-sm">
                   <div class="col-12 col-sm-6">
                     <div class="text-caption">Date</div>
-                    <div>{{ group.claimDate || 'Not recorded' }}</div>
+                    <div>{{ formatDisplayDate(group.claimDate, 'Not recorded', true) }}</div>
                   </div>
                   <div class="col-12 col-sm-6">
                     <div class="text-caption">Source</div>
@@ -480,6 +485,7 @@
 
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue';
+import { formatDisplayDate } from '@/utils/formatDate';
 import { Notify } from 'quasar';
 import type { Claim, ClaimSource, CourseSchema, Unit } from '@/types';
 import { useCourseStore } from '@/composables/useCourseStore';

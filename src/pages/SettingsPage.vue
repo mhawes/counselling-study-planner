@@ -96,6 +96,7 @@ import { useCourseStore } from '@/composables/useCourseStore';
 import { clearTrackerState, exportJson, notifyExportStateChanged } from '@/composables/useTrackerExport';
 import { useGoogleDrive2 } from '@/composables/useGoogleDrive2';
 import ButtonWithConfirmation from '@/components/ButtonWithConfirmation.vue';
+import { formatDisplayDate } from '@/utils/formatDate';
 
 const STORAGE_SESSIONS = 'placement-sessions';
 const STORAGE_SUPERVISION = 'placement-supervision';
@@ -186,7 +187,7 @@ function exportSessionCsv() {
   const rows = [header];
   sessions.forEach((session) => {
     rows.push([
-      formatCsvValue(session.date),
+      formatCsvValue(formatDisplayDate(session.date, '', true)),
       formatCsvValue(getClientNameById(clients, session.clientId)),
       formatCsvValue(getAgencyNameById(agencies, session.agencyId)),
       formatCsvValue(session.duration),
@@ -205,7 +206,7 @@ function exportSupervisionCsv() {
   const rows = [header];
   supervisionNotes.forEach((note) => {
     rows.push([
-      formatCsvValue(note.date),
+      formatCsvValue(formatDisplayDate(note.date, '', true)),
       formatCsvValue(note.supervisorName),
       formatCsvValue(note.duration),
       formatCsvValue(note.clients),
@@ -232,14 +233,7 @@ function exportCriteriaCsv() {
           const guidance = criterion.guidance.map((item) => `• ${item}`).join('\n');
           const claims = criterion.claims
             .map((claim) => {
-              let formattedDate = '';
-              if (claim.claimDate) {
-                const date = new Date(claim.claimDate);
-                const day = String(date.getDate()).padStart(2, '0');
-                const month = String(date.getMonth() + 1).padStart(2, '0');
-                const year = date.getFullYear();
-                formattedDate = `${day}/${month}/${year}`;
-              }
+              const formattedDate = formatDisplayDate(claim.claimDate, '', true);
 
               return `${claim.evidence} ${formattedDate} (${claim.source})`.trim();
             })
