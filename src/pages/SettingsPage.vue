@@ -187,7 +187,7 @@ function exportSessionCsv() {
   const rows = [header];
   sessions.forEach((session) => {
     rows.push([
-      formatCsvValue(formatDisplayDate(session.date, '', true)),
+      formatCsvValue(formatDisplayDate(session.date, '', false)),
       formatCsvValue(getClientNameById(clients, session.clientId)),
       formatCsvValue(getAgencyNameById(agencies, session.agencyId)),
       formatCsvValue(session.duration),
@@ -206,7 +206,7 @@ function exportSupervisionCsv() {
   const rows = [header];
   supervisionNotes.forEach((note) => {
     rows.push([
-      formatCsvValue(formatDisplayDate(note.date, '', true)),
+      formatCsvValue(formatDisplayDate(note.date, '', false)),
       formatCsvValue(note.supervisorName),
       formatCsvValue(note.duration),
       formatCsvValue(note.clients),
@@ -233,7 +233,7 @@ function exportCriteriaCsv() {
           const guidance = criterion.guidance.map((item) => `• ${item}`).join('\n');
           const claims = criterion.claims
             .map((claim) => {
-              const formattedDate = formatDisplayDate(claim.claimDate, '', true);
+              const formattedDate = formatDisplayDate(claim.claimDate, '', false);
 
               return `${claim.evidence} ${formattedDate} (${claim.source})`.trim();
             })

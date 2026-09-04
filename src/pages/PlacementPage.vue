@@ -251,7 +251,7 @@
                 v-for="event in clientTimeline"
                 :key="event.id"
                 :title="event.title"
-                :subtitle="formatDisplayDate(event.date, 'No date')"}
+                :subtitle="formatDisplayDate(event.date, 'No date', false)"}
                 :icon="event.icon"
                 :color="event.color"
               >
@@ -341,7 +341,7 @@
                   <q-chip color="warning" text-color="white" size="sm">IMPORTANT</q-chip>
                 </div>
                 <div class="text-caption">
-                  {{ formatDisplayDate(session.date, 'No date') }} • {{ session.duration }} h
+                  {{ formatDisplayDate(session.date, 'No date', false) }} • {{ session.duration }} h
                 </div>
                 <div class="q-mt-xs">
                   <strong>What happened:</strong>

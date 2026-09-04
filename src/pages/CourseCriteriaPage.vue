@@ -265,7 +265,7 @@
                           <q-table :rows="criterion.claims" :columns="claimColumns" row-key="id" flat dense>
                             <template #body-cell-claimDate="props">
                               <q-td :props="props" align="center">
-                                {{ formatDisplayDate(props.row.claimDate, 'Not recorded') }}
+                                {{ formatDisplayDate(props.row.claimDate, 'Not recorded', false) }}
                               </q-td>
                             </template>
                             <template #body-cell-source="props">
@@ -433,7 +433,7 @@
                 <div class="row q-gutter-sm q-mt-sm">
                   <div class="col-12 col-sm-6">
                     <div class="text-caption">Date</div>
-                    <div>{{ formatDisplayDate(group.claimDate, 'Not recorded', true) }}</div>
+                    <div>{{ formatDisplayDate(group.claimDate, 'Not recorded', false) }}</div>
                   </div>
                   <div class="col-12 col-sm-6">
                     <div class="text-caption">Source</div>
