@@ -10,7 +10,7 @@
       v-model="drawerOpen"
       :mini="drawerMini"
       show-if-above
-      bordered
+      elevated
     >
       <q-list padding>
         
@@ -218,151 +218,151 @@
       </q-card-section>
     </q-card>
 
-    <q-dialog v-model="showClientTimelineDialog" :maximized="true">
-      <q-card style="width: 700px; max-width: 90vw">
+    <q-dialog v-model="showClientTimelineDialog" full-width>
+      <q-card>
         <q-card-section>
           <div class="text-h6">
             {{ timelineClient?.anonymousIdentifier || "Client" }} timeline
           </div>
         </q-card-section>
         <q-separator />
-        <q-card-section>
-          <div v-if="clientTimeline.length === 0" class="text-grey">
-            No session or supervision notes recorded for this client.
-          </div>
-          <q-timeline v-else color="primary">
-            <q-timeline-entry
-              v-for="event in clientTimeline"
-              :key="event.id"
-              :title="event.title"
-              :subtitle="event.date || 'No date'"
-              :icon="event.icon"
-              :color="event.color"
-            >
-              <div class="text-caption">{{ event.meta }}</div>
-              <div v-if="event.details" class="q-mt-sm">
-                {{ event.details }}
-              </div>
-            </q-timeline-entry>
-          </q-timeline>
-        </q-card-section>
+        <q-scroll-area class="timeline-scroll-area">
+          <q-card-section>
+            <div v-if="clientTimeline.length === 0" class="text-grey">
+              No session or supervision notes recorded for this client.
+            </div>
+            <q-timeline v-else color="primary">
+              <q-timeline-entry
+                v-for="event in clientTimeline"
+                :key="event.id"
+                :title="event.title"
+                :subtitle="event.date || 'No date'"
+                :icon="event.icon"
+                :color="event.color"
+              >
+                <div class="text-caption">{{ event.meta }}</div>
+                <div v-if="event.details" class="q-mt-sm">
+                  {{ event.details }}
+                </div>
+              </q-timeline-entry>
+            </q-timeline>
+          </q-card-section>
+        </q-scroll-area>
         <q-card-actions align="right">
           <q-btn flat label="Close" color="secondary" @click="showClientTimelineDialog = false" />
         </q-card-actions>
       </q-card>
     </q-dialog>
 
-    <div v-if="activeView === 'sessions'" class="row q-gutter-md">
-      <div class="col-12">
-        <q-card class="q-mt-md">
-          <q-card-section class="row items-center q-gutter-sm">
-            <div class="col">
-              <div class="text-h6">Session notes</div>
-            </div>
-            <div class="col-6 col-md-4">
-              <q-select
-                v-model="clientFilter"
-                :options="clientOptions"
-                option-label="label"
-                option-value="value"
-                label="Filter by client"
-                dense
-                clearable
-                emit-value
-                map-options
-              />
-            </div>
-            <div class="col-6 col-md-4">
-              <q-select
-                v-model="agencyFilter"
-                :options="agencyOptions"
-                option-label="label"
-                option-value="value"
-                label="Filter by agency"
-                dense
-                clearable
-                emit-value
-                map-options
-              />
-            </div>
-            <div class="col-auto">
-              <q-btn
-                dense
-                label="Add session"
-                color="primary"
-                icon="add"
-                @click="openSessionDialog()"
-              />
-            </div>
-          </q-card-section>
-          <q-separator />
-          <q-card-section>
-            <div v-if="filteredSessions.length === 0" class="text-grey">
-              No placement sessions found.
-            </div>
-            <div v-else>
-              <q-item
-                v-for="session in filteredSessions"
-                :key="session.id"
-                class="q-mb-sm"
+    <q-card v-if="activeView === 'sessions'" class="q-mt-md notes-card">
+      <q-card-section class="row items-center q-gutter-sm notes-card__header">
+        <div class="col">
+          <div class="text-h6">Session notes</div>
+        </div>
+        <div class="col-6 col-md-4">
+          <q-select
+            v-model="clientFilter"
+            :options="clientOptions"
+            option-label="label"
+            option-value="value"
+            label="Filter by client"
+            dense
+            clearable
+            emit-value
+            map-options
+          />
+        </div>
+        <div class="col-6 col-md-4">
+          <q-select
+            v-model="agencyFilter"
+            :options="agencyOptions"
+            option-label="label"
+            option-value="value"
+            label="Filter by agency"
+            dense
+            clearable
+            emit-value
+            map-options
+          />
+        </div>
+        <div class="col-auto">
+          <q-btn
+            dense
+            label="Add session"
+            color="primary"
+            icon="add"
+            @click="openSessionDialog()"
+          />
+        </div>
+      </q-card-section>
+      <q-separator />
+      <q-scroll-area class="notes-scroll-area">
+        <q-card-section>
+          <div v-if="filteredSessions.length === 0" class="text-grey">
+            No placement sessions found.
+          </div>
+          <div v-else>
+            <q-item
+              v-for="session in filteredSessions"
+              :key="session.id"
+              class="q-mb-sm"
+            >
+              <q-item-section avatar>
+                <q-avatar :color="clientColor(session.clientId)">
+                  <span class="text-white">{{
+                    getClientInitials(session.clientId)
+                  }}</span>
+                </q-avatar>
+              </q-item-section>
+              <q-item-section>
+                <div class="text-subtitle1">
+                  {{ getSessionClientName(session) }} @
+                  {{ getSessionAgencyName(session) }}
+                </div>
+                <div class="text-caption">
+                  {{ session.date || "No date" }} • {{ session.duration }} h
+                </div>
+                <div class="q-mt-xs">
+                  <strong>What happened:</strong>
+                  {{ session.whatHappened || "—" }}
+                </div>
+                <div class="q-mt-xs">
+                  <strong>Personal process:</strong>
+                  {{ session.personalProcess || "—" }}
+                </div>
+                <div class="q-mt-xs">
+                  <strong>Theory:</strong> {{ session.theoryToApply || "—" }}
+                </div>
+              </q-item-section>
+              <q-item-section
+                side
+                top
+                class="row items-start justify-end q-gutter-sm"
               >
-                <q-item-section avatar>
-                  <q-avatar :color="clientColor(session.clientId)">
-                    <span class="text-white">{{
-                      getClientInitials(session.clientId)
-                    }}</span>
-                  </q-avatar>
-                </q-item-section>
-                <q-item-section>
-                  <div class="text-subtitle1">
-                    {{ getSessionClientName(session) }} @
-                    {{ getSessionAgencyName(session) }}
-                  </div>
-                  <div class="text-caption">
-                    {{ session.date || "No date" }} • {{ session.duration }} h
-                  </div>
-                  <div class="q-mt-xs">
-                    <strong>What happened:</strong>
-                    {{ session.whatHappened || "—" }}
-                  </div>
-                  <div class="q-mt-xs">
-                    <strong>Personal process:</strong>
-                    {{ session.personalProcess || "—" }}
-                  </div>
-                  <div class="q-mt-xs">
-                    <strong>Theory:</strong> {{ session.theoryToApply || "—" }}
-                  </div>
-                </q-item-section>
-                <q-item-section
-                  side
-                  top
-                  class="row items-start justify-end q-gutter-sm"
-                >
-                  <q-btn
-                    dense
-                    flat
-                    icon="edit"
-                    color="primary"
-                    @click="openSessionDialog(session)"
-                  />
-                  <ButtonWithConfirmation
-                    dense 
-                    flat 
-                    icon="delete"
-                    color="negative"
-                    confirm-message="Remove this session?"
-                    @confirm="removeSession(session.id)"
-                  />
-                </q-item-section>
-              </q-item>
-            </div>
-          </q-card-section>
-        </q-card>
-      </div>
-    </div>
+                <q-btn
+                  dense
+                  flat
+                  icon="edit"
+                  color="primary"
+                  @click="openSessionDialog(session)"
+                />
+                <ButtonWithConfirmation
+                  dense 
+                  flat 
+                  icon="delete"
+                  color="negative"
+                  confirm-message="Remove this session?"
+                  @confirm="removeSession(session.id)"
+                />
+              </q-item-section>
+            </q-item>
+          </div>
+        </q-card-section>
+      </q-scroll-area>
+    </q-card>
 
-    <q-card v-if="activeView === 'supervision'" class="q-mt-lg">
-      <q-card-section class="row items-center q-gutter-sm">
+    <q-card v-if="activeView === 'supervision'" class="q-mt-md notes-card">
+      <q-card-section class="row items-center q-gutter-sm notes-card__header">
         <div class="col">
           <div class="text-h6">Supervision notes</div>
         </div>
@@ -377,66 +377,68 @@
         </div>
       </q-card-section>
       <q-separator />
-      <q-card-section>
-        <div v-if="supervisionNotes.length === 0" class="text-grey">
-          No supervision notes recorded yet.
-        </div>
-        <div v-else>
-          <q-item
-            v-for="note in supervisionNotes"
-            :key="note.id"
-            class="q-mb-sm"
-          >
-            <q-item-section>
-              <div class="text-subtitle1">
-                {{ note.supervisorName }} on {{ note.date || "No date" }}
-              </div>
-              <div class="text-caption">
-                Duration: {{ note.duration }} h • Clients:
-                {{ getSupervisionClientNames(note) }}
-              </div>
-              <div
-                v-for="(clientNote, index) in note.clientNotes || []"
-                :key="index"
-                class="q-mt-xs"
-              >
-                <strong>{{ getClientNameById(clientNote.clientId) || "Unknown client" }}:</strong>
-                {{ clientNote.notes || "No client-specific notes." }}
-              </div>
-              <div v-if="note.notes" class="q-mt-xs">
-                <strong>General notes:</strong> {{ note.notes }}
-              </div>
-              <div
-                v-if="(!note.clientNotes || note.clientNotes.length === 0) && !note.notes"
-                class="q-mt-xs"
-              >
-                No notes recorded.
-              </div>
-            </q-item-section>
-            <q-item-section
-              side
-              top
-              class="row items-start justify-end q-gutter-sm"
+      <q-scroll-area class="notes-scroll-area">
+        <q-card-section>
+          <div v-if="supervisionNotes.length === 0" class="text-grey">
+            No supervision notes recorded yet.
+          </div>
+          <div v-else>
+            <q-item
+              v-for="note in supervisionNotes"
+              :key="note.id"
+              class="q-mb-sm"
             >
-              <q-btn
-                dense
-                flat
-                icon="edit"
-                color="primary"
-                @click="openSupervisionDialog(note)"
-              />
-              <ButtonWithConfirmation
-                dense 
-                flat 
-                icon="delete"
-                color="negative"
-                confirm-message="Remove this supervision note?"
-                @confirm="removeSupervisionNote(note.id)"
-              />
-            </q-item-section>
-          </q-item>
-        </div>
-      </q-card-section>
+              <q-item-section>
+                <div class="text-subtitle1">
+                  {{ note.supervisorName }} on {{ note.date || "No date" }}
+                </div>
+                <div class="text-caption">
+                  Duration: {{ note.duration }} h • Clients:
+                  {{ getSupervisionClientNames(note) }}
+                </div>
+                <div
+                  v-for="(clientNote, index) in note.clientNotes || []"
+                  :key="index"
+                  class="q-mt-xs"
+                >
+                  <strong>{{ getClientNameById(clientNote.clientId) || "Unknown client" }}:</strong>
+                  {{ clientNote.notes || "No client-specific notes." }}
+                </div>
+                <div v-if="note.notes" class="q-mt-xs">
+                  <strong>General notes:</strong> {{ note.notes }}
+                </div>
+                <div
+                  v-if="(!note.clientNotes || note.clientNotes.length === 0) && !note.notes"
+                  class="q-mt-xs"
+                >
+                  No notes recorded.
+                </div>
+              </q-item-section>
+              <q-item-section
+                side
+                top
+                class="row items-start justify-end q-gutter-sm"
+              >
+                <q-btn
+                  dense
+                  flat
+                  icon="edit"
+                  color="primary"
+                  @click="openSupervisionDialog(note)"
+                />
+                <ButtonWithConfirmation
+                  dense 
+                  flat 
+                  icon="delete"
+                  color="negative"
+                  confirm-message="Remove this supervision note?"
+                  @confirm="removeSupervisionNote(note.id)"
+                />
+              </q-item-section>
+            </q-item>
+          </div>
+        </q-card-section>
+      </q-scroll-area>
     </q-card>
     <q-dialog v-model="showAgencyDialog" persistent>
       <q-card>
@@ -734,6 +736,42 @@
   </q-page>
 </template>
 
+<style scoped>
+.notes-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: calc(100vh - 180px);
+  min-height: 420px;
+  max-height: calc(100vh - 120px);
+}
+
+.notes-card__header {
+  flex-shrink: 0;
+}
+
+.notes-scroll-area {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+  max-height: 100%;
+  width: 100%;
+}
+
+.timeline-scroll-area {
+  /* Ensure the scroll area has an explicit height so it is visible inside the dialog */
+  height: min(60vh, 560px);
+  min-height: 200px;
+  width: 100%;
+  display: block;
+}
+
+/* Make sure the internal scroll container has some padding so timeline entries aren't cramped */
+.timeline-scroll-area .q-scrollarea__scroll {
+  padding: 16px;
+}
+</style>
+
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from "vue";
 import { Notify, useQuasar } from "quasar";
@@ -768,7 +806,7 @@ const views: Array<{ value: PlacementView; label: string; icon: string }> = [
 
 const activeView = ref<PlacementView>("overview");
 const drawerOpen = ref(true);
-const drawerMini = ref(false);
+const drawerMini = ref(true);
 
 function selectView(view: PlacementView) {
   activeView.value = view;
@@ -857,7 +895,13 @@ const clientTimeline = computed(() => {
         icon: "edit_note",
         color: "primary",
         meta: `${session.duration} hours @ ${getSessionAgencyName(session)}`,
-        details: [session.whatHappened, session.personalProcess, session.theoryToApply]
+        details: [
+          "What happened:",
+          session.whatHappened,
+          "Personal process:", 
+          session.personalProcess,
+          "Theory to apply:", 
+          session.theoryToApply]
           .filter(Boolean)
           .join("\n\n"),
       })),

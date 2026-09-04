@@ -6,19 +6,91 @@
       message="Congratulations! You have completed all course criteria."
       dismiss-label="Close"
     />
-    <div class="row q-gutter-lg">
-      <div class="col-12">
+
+    <q-fab
+      class="course-actions-fab"
+      icon="add"
+      active-icon="close"
+      color="primary"
+      direction="down"
+      label="Actions"
+      vertical-actions-align="right"
+    >
+      <q-fab-action
+        color="accent"
+        icon="send"
+        label="Submit work"
+        @click="openSubmitWorkDialog()"
+      />
+      <q-fab-action
+        color="secondary"
+        icon="visibility"
+        label="View submitted work"
+        @click="submittedWorkDialogVisible = true"
+      />
+    </q-fab>
+
+    <q-drawer
+      v-model="drawerOpen"
+      :mini="drawerMini"
+      show-if-above
+      bordered
+    >
+      <q-list padding>
+        <q-item clickable v-ripple @click="drawerMini = !drawerMini">
+          <q-item-section avatar>
+            <q-icon :name="drawerMini ? 'chevron_right' : 'chevron_left'" />
+          </q-item-section>
+        </q-item>
+        <q-separator class="q-my-sm" />
+        <q-item
+          clickable
+          v-ripple
+          :active="activeMenuItem === 'overview'"
+          active-class="bg-primary text-white"
+          @click="selectNavigationItem('overview')"
+        >
+          <q-item-section avatar>
+            <q-icon name="dashboard" />
+          </q-item-section>
+          <q-item-section class="text-weight-medium">Overview</q-item-section>
+        </q-item>
+        <q-separator class="q-my-sm" />
+        <q-item
+          v-for="item in navigationItems.slice(1)"
+          :key="item.value"
+          clickable
+          v-ripple
+          :active="activeMenuItem === item.value"
+          active-class="bg-primary text-white"
+          @click="selectNavigationItem(item.value)"
+        >
+          <q-item-section avatar>
+            <q-icon :name="item.icon" />
+          </q-item-section>
+          <q-item-section class="text-weight-medium">{{ item.label }}</q-item-section>
+        </q-item>
+      </q-list>
+    </q-drawer>
+
+    <div class="q-mb-md">
+      <q-btn
+        flat
+        dense
+        icon="menu"
+        label="Course menu"
+        class="lt-md"
+        @click="drawerOpen = true"
+      />
+    </div>
+
+    <div class="course-criteria-content">
+      <div v-if="activeMenuItem === 'overview'" id="overview" class="q-mb-lg">
         <q-card class="q-mb-md">
           <q-card-section class="row items-center q-gutter-sm">
             <div class="col">
               <div class="text-h5">Course Criteria Tracker</div>
               <div class="text-subtitle2">Record criteria claims and track completion status for each unit.</div>
-            </div>
-            <div class="col-auto">
-              <q-btn dense label="Submit work" color="primary" icon="send" @click="openSubmitWorkDialog()" />
-            </div>
-            <div class="col-auto">
-              <q-btn dense flat label="View submitted work" color="secondary" icon="visibility" @click="submittedWorkDialogVisible = true" />
             </div>
           </q-card-section>
           <q-separator />
@@ -53,7 +125,7 @@
                 <q-linear-progress :value="course.units.filter(unitComplete).length / course.units.length" color="secondary" track-color="grey-3" />
               </div>
               <div class="col-1">
-                <div class="text-subtitle2">{{ course.units.filter(unitComplete).length }} / {{ course.units.length }} ({{ Math.round((course.units.filter(unitComplete).length / course.units.length) * 100) }}%)</div> 
+                <div class="text-subtitle2">{{ course.units.filter(unitComplete).length }} / {{ course.units.length }} ({{ Math.round((course.units.filter(unitComplete).length / course.units.length) * 100) }}%)</div>
               </div>
             </div>
 
@@ -68,152 +140,157 @@
             </div>
           </q-card-section>
         </q-card>
+      </div>
 
-    <q-card class="q-mb-md">
-      <q-card-section>
-        <div class="text-subtitle2 q-mb-sm">Filter criteria</div>
-        <div class="row q-gutter-sm items-center">
-          <div class="col">
-            <q-input v-model="searchQuery" label="Search criteria" dense clearable prepend-icon="search" />
-          </div>
-          <div class="col">
-            <q-select
-              v-model="selectedUnitIds"
-              :options="unitOptions"
-              label="Filter by unit"
-              dense
-              multiple
-              use-chips
-              emit-value
-              map-options
-            />
-          </div>
-          <div class="col">
-            <q-select
-              v-model="selectedWorkEvidence"
-              :options="workEvidenceOptions"
-              label="Filter by work / evidence"
-              dense
-              clearable
-              emit-value
-              map-options
-            />
-          </div>
-          <div class="col">
-            <q-toggle v-model="showIncompleteOnly" label="Incomplete only" dense />
-          </div>
-        </div>
-      </q-card-section>
-    </q-card>
-
-    <div v-if="filteredUnits.length === 0" class="text-grey text-center q-pa-md">
-          No criteria match your search.
-        </div>
-
-        <div v-for="unit in filteredUnits" :key="unit.id" class="q-mb-md">
-          <q-card>
-            <q-card-section class="row items-center q-gutter-sm">
+      <div v-else>
+        <q-card class="q-mb-sm">
+          <q-card-section>
+            <div class="row q-gutter-xs items-center">
               <div class="col">
-                <div class="text-h6">Unit {{ unit.id }}: {{ unit.learningOutcome }}</div>
-                <div class="text-caption">{{ unit.sections.length }} section(s)</div>
+                <q-input v-model="searchQuery" label="Search criteria" dense clearable prepend-icon="search" />
               </div>
-              <div class="col-auto">
-                <q-chip :color="unitComplete(courseUnit(unit.id)) ? 'positive' : 'warning'" text-color="white">
-                  {{ unitComplete(courseUnit(unit.id)) ? 'Complete' : 'Incomplete' }}
-                </q-chip>
+              <div class="col">
+                <q-select
+                  v-model="selectedUnitIds"
+                  :options="unitOptions"
+                  label="Filter by unit"
+                  dense
+                  multiple
+                  use-chips
+                  emit-value
+                  map-options
+                />
               </div>
-            </q-card-section>
-            <q-separator />
-            <q-card-section v-if="perTypeScope === 'unit'">
-              <div class="row q-gutter-md">
-                <div class="col-9 col-md-3" v-for="source in requiredSources" :key="source">
-                  <q-banner :color="unitSourceCount(courseUnit(unit.id), source) >= (course.rules?.perType?.counts?.[source] ?? 0) ? 'positive' : 'grey-3'" class="q-pa-sm">
-                    <div class="text-body2">{{ source }}</div>
-                    <q-chip :color="unitSourceCount(courseUnit(unit.id), source) >= (course.rules?.perType?.counts?.[source] ?? 0) ? getClaimSourceColour(source) : 'grey-9'" text-color="white">
-                      {{ unitSourceCount(courseUnit(unit.id), source) }} / {{ course.rules?.perType?.counts?.[source] ?? 0 }} required
-                    </q-chip>
-                  </q-banner>
-                </div>
+              <div class="col">
+                <q-select
+                  v-model="selectedWorkEvidence"
+                  :options="workEvidenceOptions"
+                  label="Filter by work / evidence"
+                  dense
+                  clearable
+                  emit-value
+                  map-options
+                />
               </div>
-            </q-card-section>
-            <q-separator />
-            <q-card-section>
-              <div v-for="section in unit.sections" :key="section.id" class="q-mb-lg">
-                <div class="text-subtitle1">Section {{ section.id }}: {{ section.learningOutcome }}</div>
+              <div class="col">
+                <q-toggle v-model="showIncompleteOnly" label="Incomplete only" dense />
+              </div>
+            </div>
+          </q-card-section>
+        </q-card>
 
-                <div v-if="perTypeScope === 'section'">
-                  <div class="row q-gutter-md q-mt-xs">
-                    <div class="col-9 col-md-3" v-for="source in requiredSources" :key="source + section.id">
-                      <q-banner :color="sectionSourceCount(courseSection(unit.id, section.id), source) >= (course.rules?.perType?.counts?.[source] ?? 0) ? 'positive' : 'grey-3'" class="q-pa-sm">
+        <q-scroll-area class="criteria-scroll-area">
+          <div class="criteria-scroll-content">
+            <div v-if="filteredUnits.length === 0" class="text-grey text-center q-pa-md">
+              No criteria match your search.
+            </div>
+
+            <div v-for="unit in filteredUnits" :key="unit.id" class="q-mb-md" :id="unitAnchorId(unit.id)">
+              <q-card>
+                <q-card-section class="row items-center q-gutter-sm">
+                  <div class="col">
+                    <div class="text-h6">Unit {{ unit.id }}: {{ unit.learningOutcome }}</div>
+                    <div class="text-caption">{{ unit.sections.length }} section(s)</div>
+                  </div>
+                  <div class="col-auto">
+                    <q-chip :color="unitComplete(courseUnit(unit.id)) ? 'positive' : 'warning'" text-color="white">
+                      {{ unitComplete(courseUnit(unit.id)) ? 'Complete' : 'Incomplete' }}
+                    </q-chip>
+                  </div>
+                </q-card-section>
+                <q-separator />
+                <q-card-section v-if="perTypeScope === 'unit'">
+                  <div class="row q-gutter-md">
+                    <div class="col-9 col-md-3" v-for="source in requiredSources" :key="source">
+                      <q-banner :color="unitSourceCount(courseUnit(unit.id), source) >= (course.rules?.perType?.counts?.[source] ?? 0) ? 'positive' : 'grey-3'" class="q-pa-sm">
                         <div class="text-body2">{{ source }}</div>
-                        <q-chip :color="sectionSourceCount(courseSection(unit.id, section.id), source) >= (course.rules?.perType?.counts?.[source] ?? 0) ?  getClaimSourceColour(source) : 'grey-3'" text-color="white">
-                          {{ sectionSourceCount(courseSection(unit.id, section.id), source) }} / {{ course.rules?.perType?.counts?.[source] ?? 0 }} required
+                        <q-chip :color="unitSourceCount(courseUnit(unit.id), source) >= (course.rules?.perType?.counts?.[source] ?? 0) ? getClaimSourceColour(source) : 'grey-9'" text-color="white">
+                          {{ unitSourceCount(courseUnit(unit.id), source) }} / {{ course.rules?.perType?.counts?.[source] ?? 0 }} required
                         </q-chip>
                       </q-banner>
                     </div>
                   </div>
-                </div>
+                </q-card-section>
+                <q-separator />
+                <q-card-section>
+                  <div v-for="section in unit.sections" :key="section.id" class="q-mb-lg" :id="sectionAnchorId(unit.id, section.id)">
+                    <div class="text-subtitle1">Section {{ section.id }}: {{ section.learningOutcome }}</div>
 
-                <div class="text-caption q-mb-sm">{{ section.criteria.length }} criteria</div>
-                <div v-for="criterion in section.criteria" :key="criterion.id" class="q-mb-md">
-                  <q-expansion-item
-                    expand-separator
-                    :label="criterion.id + ' – ' + criterion.title"
-                    switch-toggle
-                  >
-                    <template #header>
-                      <div class="row items-center no-wrap full-width">
-                        <div class="col">{{ criterion.id }} – {{ criterion.title }}</div>
-                        <div class="col-auto">
-                          <div class="row items-center q-gutter-xs">
-                            <q-icon v-for="(claim, i) in criterion.claims" :key="`claim-${i}`" :name="i < (course.rules?.perCriterion?.count ?? 1) ? 'check_circle' : 'circle'" :color="getClaimSourceColour(claim.source)" size="sm" />
-                            <q-icon v-for="i in Math.max(0, (course.rules?.perCriterion?.count ?? 1) - criterion.claims.length)" :key="`unclaimed-${i}`" name="radio_button_unchecked" color="grey-5" size="sm" />
+                    <div v-if="perTypeScope === 'section'">
+                      <div class="row q-gutter-md q-mt-xs">
+                        <div class="col-9 col-md-3" v-for="source in requiredSources" :key="source + section.id">
+                          <q-banner :color="sectionSourceCount(courseSection(unit.id, section.id), source) >= (course.rules?.perType?.counts?.[source] ?? 0) ? 'positive' : 'grey-3'" class="q-pa-sm">
+                            <div class="text-body2">{{ source }}</div>
+                            <q-chip :color="sectionSourceCount(courseSection(unit.id, section.id), source) >= (course.rules?.perType?.counts?.[source] ?? 0) ? getClaimSourceColour(source) : 'grey-3'" text-color="white">
+                              {{ sectionSourceCount(courseSection(unit.id, section.id), source) }} / {{ course.rules?.perType?.counts?.[source] ?? 0 }} required
+                            </q-chip>
+                          </q-banner>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="text-caption q-mb-sm">{{ section.criteria.length }} criteria</div>
+                    <div v-for="criterion in section.criteria" :key="criterion.id" class="q-mb-md">
+                      <q-expansion-item
+                        expand-separator
+                        :label="criterion.id + ' – ' + criterion.title"
+                        switch-toggle
+                      >
+                        <template #header>
+                          <div class="row items-center no-wrap full-width">
+                            <div class="col">{{ criterion.id }} – {{ criterion.title }}</div>
+                            <div class="col-auto">
+                              <div class="row items-center q-gutter-xs">
+                                <q-icon v-for="(claim, i) in criterion.claims" :key="`claim-${i}`" :name="i < (course.rules?.perCriterion?.count ?? 1) ? 'check_circle' : 'circle'" :color="getClaimSourceColour(claim.source)" size="sm" />
+                                <q-icon v-for="i in Math.max(0, (course.rules?.perCriterion?.count ?? 1) - criterion.claims.length)" :key="`unclaimed-${i}`" name="radio_button_unchecked" color="grey-5" size="sm" />
+                              </div>
+                            </div>
+                          </div>
+                        </template>
+                        <div class="q-mb-md">
+                          <div class="row items-center q-gutter-sm">
+                            <div class="col">
+                              <div class="text-caption">Guidance:</div>
+                              <ul class="q-pl-lg q-ma-none">
+                                <li v-for="(guidance, idx) in criterion.guidance" :key="idx">{{ guidance }}</li>
+                              </ul>
+                            </div>
+                            <div class="col-auto">
+                              <q-btn dense flat color="primary" icon="add" label="Add claim" @click="openClaimDialog(unit.id, section.id, criterion)" />
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </template>
-                    <div class="q-mb-md">
-                      <div class="row items-center q-gutter-sm">
-                        <div class="col">
-                          <div class="text-caption">Guidance:</div>
-                          <ul class="q-pl-lg q-ma-none">
-                            <li v-for="(guidance, idx) in criterion.guidance" :key="idx">{{ guidance }}</li>
-                          </ul>
+                        <div v-if="criterion.claims.length === 0" class="text-grey">No claims recorded for this criterion yet.</div>
+                        <div v-else>
+                          <q-table :rows="criterion.claims" :columns="claimColumns" row-key="id" flat dense>
+                            <template #body-cell-source="props">
+                              <q-td :props="props" align="center">
+                                <q-chip :color="getClaimSourceColour(props.row.source)" text-color="white">{{props.row.source}}</q-chip>
+                              </q-td>
+                            </template>
+                            <template #body-cell-confirmed="props">
+                              <q-td :props="props" align="center">
+                                <q-checkbox v-model="props.row.confirmed" />
+                              </q-td>
+                            </template>
+                            <template #body-cell-action="props">
+                              <q-td :props="props" align="center">
+                                <div class="row items-center justify-center">
+                                  <q-btn dense flat icon="edit" color="primary" @click="openClaimDialog(unit.id, section.id, criterion, props.row)" />
+                                  <ButtonWithConfirmation dense flat icon="delete" color="negative" confirm-message="Remove this claim?" @confirm="removeClaim(unit.id, section.id, criterion.id, props.row.id)" />
+                                </div>
+                              </q-td>
+                            </template>
+                          </q-table>
                         </div>
-                        <div class="col-auto">
-                          <q-btn dense flat color="primary" icon="add" label="Add claim" @click="openClaimDialog(unit.id, section.id, criterion)" />
-                        </div>
-                      </div>
+                      </q-expansion-item>
                     </div>
-                    <div v-if="criterion.claims.length === 0" class="text-grey">No claims recorded for this criterion yet.</div>
-                    <div v-else>
-                      <q-table :rows="criterion.claims" :columns="claimColumns" row-key="id" flat dense>
-                        <template #body-cell-source="props">
-                          <q-td :props="props" align="center">
-                            <q-chip :color="getClaimSourceColour(props.row.source)" text-color="white">{{props.row.source}}</q-chip>
-                          </q-td>
-                        </template>
-                        <template #body-cell-confirmed="props">
-                          <q-td :props="props" align="center">
-                            <q-checkbox v-model="props.row.confirmed" @update:model-value="(val) => { props.row.confirmed = val; saveCourse(); }" />
-                          </q-td>
-                        </template>
-                        <template #body-cell-action="props">
-                          <q-td :props="props" align="center">
-                            <div class="row items-center justify-center">
-                              <q-btn dense flat icon="edit" color="primary" @click="openClaimDialog(unit.id, section.id, criterion, props.row)" />
-                              <ButtonWithConfirmation dense flat icon="delete" color="negative" confirm-message="Remove this claim?" @confirm="removeClaim(unit.id, section.id, criterion.id, props.row.id)" />
-                            </div>
-                          </q-td>
-                        </template>
-                      </q-table>
-                    </div>
-                  </q-expansion-item>
-                </div>
-              </div>
-            </q-card-section>
-          </q-card>
-        </div>
+                  </div>
+                </q-card-section>
+              </q-card>
+            </div>
+          </div>
+        </q-scroll-area>
       </div>
     </div>
 
@@ -378,6 +455,29 @@
   </q-page>
 </template>
 
+<style scoped>
+.course-criteria-content {
+  max-width: 100%;
+}
+
+.course-actions-fab {
+  position: fixed;
+  right: 24px;
+  top: 90px;
+  z-index: 2000;
+}
+
+.criteria-scroll-area {
+  height: min(70vh, 760px);
+  max-height: 70vh;
+  width: 100%;
+}
+
+.criteria-scroll-content {
+  padding-right: 8px;
+}
+</style>
+
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue';
 import { Notify } from 'quasar';
@@ -388,6 +488,75 @@ import FireworksDisplay from '@/components/FireworksDisplay.vue';
 import ButtonWithConfirmation from '@/components/ButtonWithConfirmation.vue';
 
 const { course } = useCourseStore();
+
+const drawerOpen = ref(true);
+const drawerMini = ref(true);
+const activeMenuItem = ref('overview');
+
+
+function unitAnchorId(unitId: string) {
+  return `unit-${unitId}`;
+}
+
+function sectionAnchorId(unitId: string, sectionId: string) {
+  return `section-${unitId}-${sectionId}`;
+}
+
+const navigationItems = computed(() => {
+  const items: Array<{ value: string; label: string; icon: string }> = [
+    { value: 'overview', label: 'Overview', icon: 'dashboard' }
+  ];
+
+  const numberIconFor = (number: string) => {
+    const suffix = Number.parseInt(number, 10);
+    if (Number.isNaN(suffix)) return 'format_list_numbered';
+    if (suffix >= 1 && suffix <= 9) {
+      return `filter_${suffix}`;
+    }
+    return 'filter_9_plus';
+  };
+
+  const truncateMenuLabel = (value: string) => {
+    const trimmed = value.trim();
+    if (trimmed.length <= 100) return trimmed;
+    return `${trimmed.slice(0, 97)}…`;
+  };
+
+  if (course.units.length <= 1) {
+    course.units.forEach((unit) => {
+      unit.sections.forEach((section) => {
+        items.push({
+          value: sectionAnchorId(unit.id, section.id),
+          label: truncateMenuLabel(`Section ${section.id}: ${section.learningOutcome}`),
+          icon: numberIconFor(section.id)
+        });
+      });
+    });
+    return items;
+  }
+
+  course.units.forEach((unit) => {
+    items.push({
+      value: unitAnchorId(unit.id),
+      label: truncateMenuLabel(`Unit ${unit.id}: ${unit.learningOutcome}`),
+      icon: numberIconFor(unit.id)
+    });
+  });
+
+  return items;
+});
+
+function selectNavigationItem(targetId: string) {
+  activeMenuItem.value = targetId;
+  const element = document.getElementById(targetId);
+  if (element) {
+    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  if (window.innerWidth < 1024) {
+    drawerOpen.value = false;
+  }
+}
+
 
 const claimDialogVisible = ref(false);
 const claimDialogContext = reactive({
