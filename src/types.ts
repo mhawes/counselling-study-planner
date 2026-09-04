@@ -88,6 +88,7 @@ export interface PlacementSession {
   whatHappened: string;
   personalProcess: string;
   theoryToApply: string;
+  important?: boolean;
 }
 
 export interface SupervisionClientNote {

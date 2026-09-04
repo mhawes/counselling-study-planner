@@ -55,17 +55,32 @@
       </q-card-section>
       <q-separator />
       <q-card-section>
-        <div class="row q-mb-sm">
-          <div class="col">Overall hours:</div>
-          <div class="col-auto"><strong>{{ totalHours.toFixed(1) }}</strong></div>
+        <div class="row q-mb-sm items-center">
+          <div class="col">
+            <div class="text-subtitle2">Overall hours</div>
+            <q-linear-progress :value="overallHoursProgressValue" color="primary" track-color="grey-3" />
+          </div>
+          <div class="col-auto">
+            <div class="text-subtitle2">
+              <span v-if="requiredPlacementHours">
+                {{ totalHours.toFixed(1) }} / {{ requiredPlacementHours }} ({{ Math.round(overallHoursProgressValue * 100) }}%)
+              </span>
+              <span v-else>{{ totalHours.toFixed(1) }} h</span>
+            </div>
+          </div>
         </div>
         <div class="q-mb-sm">Hours by client:</div>
         <div
           v-for="client in hoursByClient"
-          :key="client.key"
+          :key="client.id || client.name"
           class="row items-center q-px-xs q-py-xs"
         >
-          <div class="col">{{ client.key }}</div>
+          <div class="col row items-center no-wrap">
+            <q-avatar :color="client.id ? clientColor(client.id) : 'grey'" size="sm" class="q-mr-sm">
+              <span class="text-white">{{ client.id ? getClientInitials(client.id) : (client.name ? client.name.split(/\s+/)[0].slice(0,2).toUpperCase() : '??') }}</span>
+            </q-avatar>
+            <div>{{ client.name }}</div>
+          </div>
           <div class="col-auto"><strong>{{ client.value.toFixed(1) }}</strong></div>
         </div>
         <div class="q-mt-md q-mb-sm">Hours by agency:</div>
@@ -240,7 +255,10 @@
                 :icon="event.icon"
                 :color="event.color"
               >
-                <div class="text-caption">{{ event.meta }}</div>
+                <div v-if="event.important" class="q-mb-sm">
+                <q-chip color="warning" text-color="white" size="sm">IMPORTANT</q-chip>
+              </div>
+              <div class="text-caption">{{ event.meta }}</div>
                 <div v-if="event.details" class="q-mt-sm">
                   {{ event.details }}
                 </div>
@@ -318,6 +336,9 @@
                 <div class="text-subtitle1">
                   {{ getSessionClientName(session) }} @
                   {{ getSessionAgencyName(session) }}
+                </div>
+                <div v-if="session.important" class="q-mt-xs">
+                  <q-chip color="warning" text-color="white" size="sm">IMPORTANT</q-chip>
                 </div>
                 <div class="text-caption">
                   {{ session.date || "No date" }} • {{ session.duration }} h
@@ -579,6 +600,10 @@
                   min="0"
                   dense
                 />
+              </div>
+
+              <div class="col-12 col-sm-6">
+                <q-toggle v-model="editingSession.important" label="Important" dense />
               </div>
               <div class="col-12">
                 <q-input
@@ -871,6 +896,7 @@ const editingSession = reactive<PlacementSession>({
   whatHappened: "",
   personalProcess: "",
   theoryToApply: "",
+  important: false,
 });
 
 const editingSupervision = reactive<SupervisionNote>({
@@ -894,6 +920,7 @@ const clientTimeline = computed(() => {
         title: "Session note",
         icon: "edit_note",
         color: "primary",
+        important: !!session.important,
         meta: `${session.duration} hours @ ${getSessionAgencyName(session)}`,
         details: [
           "What happened:",
@@ -1114,6 +1141,16 @@ const totalHours = computed(() =>
   sessions.value.reduce((sum, item) => sum + item.duration, 0),
 );
 
+// Required placement hours from course rules (if configured)
+const requiredPlacementHours = computed(() => course.rules?.placement?.requiredPlacementHours ?? null);
+
+// Progress value between 0 and 1 for the overall hours (clamped)
+const overallHoursProgressValue = computed(() => {
+  const required = requiredPlacementHours.value;
+  if (!required || required === 0) return 0;
+  return Math.min(totalHours.value / required, 1);
+});
+
 const workedWithClientCount = computed(() => {
   return new Set(sessions.value.map((session) => session.clientId).filter(Boolean)).size;
 });
@@ -1127,14 +1164,20 @@ const placementComplete = computed(() => {
 });
 
 const hoursByClient = computed(() => {
-  const map = new Map<string, number>();
+  // Aggregate by client id when available, otherwise by the displayed name
+  const map = new Map<string, { id?: string; name: string; value: number }>();
   sessions.value.forEach((item) => {
-    const key = getSessionClientName(item);
-    map.set(key, (map.get(key) ?? 0) + item.duration);
+    const id = item.clientId;
+    const name = getSessionClientName(item);
+    const key = id ?? `name:${name}`;
+    const existing = map.get(key);
+    if (existing) {
+      existing.value += item.duration;
+    } else {
+      map.set(key, { id, name, value: item.duration });
+    }
   });
-  return Array.from(map.entries())
-    .map(([key, value]) => ({ key, value }))
-    .sort((a, b) => b.value - a.value);
+  return Array.from(map.values()).sort((a, b) => b.value - a.value);
 });
 
 const hoursByAgency = computed(() => {
@@ -1191,7 +1234,8 @@ function openSessionDialog(session?: PlacementSession) {
       whatHappened: "",
       personalProcess: "",
       theoryToApply: "",
-    });
+    important: false,
+  });
   }
   showSessionDialog.value = true;
 }
