@@ -37,7 +37,7 @@
       bordered
     >
       <q-list padding>
-        <q-item clickable v-ripple @click="drawerMini = !drawerMini">
+        <q-item v-if="!$q.screen.lt.md" clickable v-ripple @click="drawerMini = !drawerMini">
           <q-item-section avatar>
             <q-icon :name="drawerMini ? 'chevron_right' : 'chevron_left'" />
           </q-item-section>
@@ -492,7 +492,7 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue';
 import { formatDisplayDate } from '@/utils/formatDate';
-import { Notify } from 'quasar';
+import { Notify, useQuasar } from 'quasar';
 import type { Claim, ClaimSource, CourseSchema, Unit } from '@/types';
 import { useCourseStore } from '@/composables/useCourseStore';
 import { uuid } from '@/utils/uuid';
@@ -501,7 +501,9 @@ import ButtonWithConfirmation from '@/components/ButtonWithConfirmation.vue';
 
 const { course } = useCourseStore();
 
-const drawerOpen = ref(true);
+const $q = useQuasar();
+
+const drawerOpen = ref(!$q.screen.lt.md);
 const drawerMini = ref(true);
 const activeMenuItem = ref('overview');
 
@@ -564,7 +566,7 @@ function selectNavigationItem(targetId: string) {
   if (element) {
     element.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
-  if (window.innerWidth < 1024) {
+  if ($q.screen.lt.md) {
     drawerOpen.value = false;
   }
 }

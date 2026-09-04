@@ -14,7 +14,7 @@
     >
       <q-list padding>
         
-        <q-item clickable v-ripple @click="drawerMini = !drawerMini">
+        <q-item v-if="!$q.screen.lt.md" clickable v-ripple @click="drawerMini = !drawerMini">
           <q-item-section avatar>
             <q-icon :name="drawerMini ? 'chevron_right' : 'chevron_left'" />
           </q-item-section>
@@ -831,7 +831,7 @@ const views: Array<{ value: PlacementView; label: string; icon: string }> = [
 ];
 
 const activeView = ref<PlacementView>("overview");
-const drawerOpen = ref(true);
+const drawerOpen = ref(!$q.screen.lt.md);
 const drawerMini = ref(true);
 
 function selectView(view: PlacementView) {
