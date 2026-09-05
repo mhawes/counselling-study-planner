@@ -9,6 +9,7 @@ function emptyCourse(): CourseSchema {
     courseTitle: '',
     courseCode: '',
     courseYear: '',
+    candidateName: '',
     coursework: [],
     units: []
   };
@@ -91,6 +92,7 @@ function isValidCourseSchema(obj: unknown): obj is CourseSchema {
   if (typeof asAny.courseTitle !== 'string') return false;
   if (typeof asAny.courseCode !== 'string') return false;
   if (typeof asAny.courseYear !== 'string') return false;
+  if (asAny.candidateName != null && typeof asAny.candidateName !== 'string') return false;
   if (!Array.isArray(asAny.coursework)) return false;
   if (!Array.isArray(asAny.units)) return false;
 
@@ -153,7 +155,7 @@ function isValidCourseSchema(obj: unknown): obj is CourseSchema {
 function isCourseEmpty(course: CourseSchema | null): boolean {
   return (
     !course ||
-    (!course.courseTitle && !course.courseCode && !course.courseYear && course.units.length === 0)
+    (!course.courseTitle && !course.courseCode && !course.courseYear && !(course.candidateName) && course.units.length === 0)
   );
 }
 
@@ -186,6 +188,7 @@ function replaceCourse(data: CourseSchema) {
   course.courseTitle = data.courseTitle;
   course.courseCode = data.courseCode;
   course.courseYear = data.courseYear;
+  course.candidateName = (data as any).candidateName ?? '';
   course.coursework.splice(0, course.coursework.length, ...structuredClone(data.coursework ?? []));
   // copy units
   course.units.splice(0, course.units.length, ...structuredClone(data.units));
@@ -207,6 +210,7 @@ function continueWithEmptyModel() {
   course.courseTitle = '';
   course.courseCode = '';
   course.courseYear = '';
+  course.candidateName = '';
   course.coursework.splice(0, course.coursework.length);
   course.units.splice(0, course.units.length);
   // remove any rules when continuing empty
@@ -218,7 +222,7 @@ function continueWithEmptyModel() {
 watch(
   course,
   () => {
-    if (course.courseTitle || course.courseCode || course.courseYear || course.units.length > 0) {
+    if (course.courseTitle || course.courseCode || course.courseYear || course.candidateName || course.units.length > 0) {
       saveCourse();
     }
   },

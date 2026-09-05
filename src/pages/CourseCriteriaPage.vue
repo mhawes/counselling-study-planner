@@ -99,6 +99,9 @@
               <div class="col-12 col-sm-6 col-md-3">
                 <q-input v-model="course.courseYear" label="Course Year" dense placeholder="YYYY-YYYY" />
               </div>
+              <div class="col-12 col-sm-6 col-md-3">
+                <q-input v-model="course.candidateName" label="Candidate Name" dense />
+              </div>
             </div>
           </q-card-section>
           <q-separator />
@@ -511,7 +514,6 @@
 import { computed, reactive, ref, watch } from 'vue';
 import { formatDisplayDate } from '@/utils/formatDate';
 import { Notify, useQuasar } from 'quasar';
-import { AlignmentType, BorderStyle, Document, Packer, Paragraph, Table, TableCell, TableRow, TextRun, WidthType } from 'docx';
 import PizZip from 'pizzip';
 import Docxtemplater from 'docxtemplater';
 import templateUrl from '@/data/cas_template.docx?url';
@@ -1151,6 +1153,7 @@ async function generateCriteriaAssessmentSheet(coursework: { id: string; evidenc
 
     const rows = buildCriteriaAssessmentRows(coursework.id);
     const data = {
+      candidate: course.candidateName || '',
       course: course.courseCode || '',
       qualification: course.courseTitle || '',
       coursework: coursework.evidence || '',
@@ -1160,7 +1163,11 @@ async function generateCriteriaAssessmentSheet(coursework: { id: string; evidenc
     doc.setData(data);
     doc.render();
 
-    const out = doc.getZip().generate({ type: 'blob' });
+    // generate blob from the filled template
+    const rawOut = doc.getZip().generate({ type: 'blob' });
+    // Ensure correct MIME type for .docx so Android and other browsers do not treat it as a zip
+    const mimeType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+    const out = new Blob([rawOut], { type: mimeType });
 
     const worksheetName = `${coursework.evidence || 'criteria-assessment-sheet'}`.trim() || 'criteria-assessment-sheet';
     const safeFilename = `${worksheetName.replace(/[^a-z0-9\-_]+/gi, '-').toLowerCase()}.docx`;

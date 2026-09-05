@@ -66,6 +66,8 @@ export interface CourseSchema {
   courseTitle: string;
   courseCode: string;
   courseYear: string;
+  // Optional candidate name associated with this course instance
+  candidateName?: string;
   coursework: Coursework[];
   units: Unit[];
   rules?: CriteriaRules;

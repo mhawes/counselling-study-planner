@@ -6,6 +6,7 @@ function emptyCourse() {
         courseTitle: '',
         courseCode: '',
         courseYear: '',
+        candidateName: '',
         coursework: [],
         units: []
     };
@@ -85,6 +86,8 @@ function isValidCourseSchema(obj) {
     if (typeof asAny.courseCode !== 'string')
         return false;
     if (typeof asAny.courseYear !== 'string')
+        return false;
+    if (asAny.candidateName != null && typeof asAny.candidateName !== 'string')
         return false;
     if (!Array.isArray(asAny.coursework))
         return false;
@@ -170,7 +173,7 @@ function isValidCourseSchema(obj) {
 }
 function isCourseEmpty(course) {
     return (!course ||
-        (!course.courseTitle && !course.courseCode && !course.courseYear && course.units.length === 0));
+        (!course.courseTitle && !course.courseCode && !course.courseYear && !(course.candidateName) && course.units.length === 0));
 }
 function loadCourseFromStorage() {
     try {
@@ -198,6 +201,7 @@ function replaceCourse(data) {
     course.courseTitle = data.courseTitle;
     course.courseCode = data.courseCode;
     course.courseYear = data.courseYear;
+    course.candidateName = data.candidateName ?? '';
     course.coursework.splice(0, course.coursework.length, ...structuredClone(data.coursework ?? []));
     // copy units
     course.units.splice(0, course.units.length, ...structuredClone(data.units));
@@ -218,6 +222,7 @@ function continueWithEmptyModel() {
     course.courseTitle = '';
     course.courseCode = '';
     course.courseYear = '';
+    course.candidateName = '';
     course.coursework.splice(0, course.coursework.length);
     course.units.splice(0, course.units.length);
     // remove any rules when continuing empty
@@ -226,7 +231,7 @@ function continueWithEmptyModel() {
     welcomeDialogVisible.value = false;
 }
 watch(course, () => {
-    if (course.courseTitle || course.courseCode || course.courseYear || course.units.length > 0) {
+    if (course.courseTitle || course.courseCode || course.courseYear || course.candidateName || course.units.length > 0) {
         saveCourse();
     }
 }, { deep: true });
