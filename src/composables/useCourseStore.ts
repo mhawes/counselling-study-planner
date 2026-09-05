@@ -9,8 +9,80 @@ function emptyCourse(): CourseSchema {
     courseTitle: '',
     courseCode: '',
     courseYear: '',
+    coursework: [],
     units: []
   };
+}
+
+function createCourseworkId() {
+  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+    return crypto.randomUUID();
+  }
+  return `coursework-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function normalizeCourseSchema(course: any): any {
+  if (!course || typeof course !== 'object') {
+    return course;
+  }
+
+  if (!Array.isArray(course.coursework)) {
+    course.coursework = [];
+  }
+
+  const courseworkByKey = new Map<string, { id: string; name: string; confirmed: boolean; date: string | null; type: string }>();
+
+  const addCoursework = (name: string, confirmed: boolean, date: string | null, type: string) => {
+    const key = JSON.stringify([name, confirmed, date, type]);
+    if (!courseworkByKey.has(key)) {
+      const coursework = {
+        id: createCourseworkId(),
+        name,
+        confirmed,
+        date,
+        type
+      };
+      courseworkByKey.set(key, coursework);
+      course.coursework.push(coursework);
+    }
+    return courseworkByKey.get(key)!.id;
+  };
+
+  const walkClaims = (unitList: any[] = []) => {
+    for (const unit of unitList) {
+      if (!unit || typeof unit !== 'object') continue;
+      for (const section of unit.sections ?? []) {
+        if (!section || typeof section !== 'object') continue;
+        for (const criterion of section.criteria ?? []) {
+          if (!criterion || typeof criterion !== 'object') continue;
+          for (const claim of criterion.claims ?? []) {
+            if (!claim || typeof claim !== 'object') continue;
+
+            const legacyCourseworkId = typeof claim.courseworkId === 'string' ? claim.courseworkId : null;
+            const name = typeof claim.evidence === 'string' ? claim.evidence.trim() : '';
+            const confirmed = Boolean(claim.confirmed);
+            const date = typeof claim.claimDate === 'string' ? claim.claimDate : null;
+            const type = typeof claim.source === 'string' ? claim.source : 'Written';
+
+            if (legacyCourseworkId) {
+              claim.courseworkId = legacyCourseworkId;
+            } else if (name.length > 0 || date !== null || confirmed || typeof claim.source === 'string') {
+              const courseworkId = addCoursework(name, confirmed, date, type);
+              claim.courseworkId = courseworkId;
+            }
+
+            delete claim.evidence;
+            delete claim.claimDate;
+            delete claim.confirmed;
+            delete claim.source;
+          }
+        }
+      }
+    }
+  };
+
+  walkClaims(course.units);
+  return course;
 }
 
 function isValidCourseSchema(obj: unknown): obj is CourseSchema {
@@ -19,7 +91,16 @@ function isValidCourseSchema(obj: unknown): obj is CourseSchema {
   if (typeof asAny.courseTitle !== 'string') return false;
   if (typeof asAny.courseCode !== 'string') return false;
   if (typeof asAny.courseYear !== 'string') return false;
+  if (!Array.isArray(asAny.coursework)) return false;
   if (!Array.isArray(asAny.units)) return false;
+
+  for (const coursework of asAny.coursework) {
+    if (!coursework || typeof coursework !== 'object') return false;
+    if (typeof coursework.id !== 'string' || typeof coursework.name !== 'string') return false;
+    if (typeof coursework.confirmed !== 'boolean') return false;
+    if (coursework.date !== null && typeof coursework.date !== 'string') return false;
+    if (typeof coursework.type !== 'string') return false;
+  }
 
   for (const unit of asAny.units) {
     if (!unit || typeof unit !== 'object') return false;
@@ -34,6 +115,10 @@ function isValidCourseSchema(obj: unknown): obj is CourseSchema {
         if (typeof criterion.id !== 'string' || typeof criterion.title !== 'string') return false;
         if (!Array.isArray(criterion.guidance)) return false;
         if (!Array.isArray(criterion.claims)) return false;
+        for (const claim of criterion.claims) {
+          if (!claim || typeof claim !== 'object') return false;
+          if (typeof claim.id !== 'string' || typeof claim.courseworkId !== 'string') return false;
+        }
       }
     }
   }
@@ -79,7 +164,7 @@ function loadCourseFromStorage(): CourseSchema | null {
       return null;
     }
 
-    const parsed = JSON.parse(raw);
+    const parsed = normalizeCourseSchema(JSON.parse(raw));
     return isValidCourseSchema(parsed) && !isCourseEmpty(parsed) ? parsed : null;
   } catch {
     return null;
@@ -101,6 +186,7 @@ function replaceCourse(data: CourseSchema) {
   course.courseTitle = data.courseTitle;
   course.courseCode = data.courseCode;
   course.courseYear = data.courseYear;
+  course.coursework.splice(0, course.coursework.length, ...structuredClone(data.coursework ?? []));
   // copy units
   course.units.splice(0, course.units.length, ...structuredClone(data.units));
   // copy rules if present (structuredClone to break reactive links)
@@ -121,6 +207,7 @@ function continueWithEmptyModel() {
   course.courseTitle = '';
   course.courseCode = '';
   course.courseYear = '';
+  course.coursework.splice(0, course.coursework.length);
   course.units.splice(0, course.units.length);
   // remove any rules when continuing empty
   // @ts-ignore

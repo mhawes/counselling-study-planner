@@ -3,13 +3,20 @@ export type ClaimSource =
   | 'Testimony'
   | 'TutorObservation';
 
+export type CourseworkType = ClaimSource;
+
+export interface Coursework {
+  id: string;
+  name: string;
+  confirmed: boolean;
+  date: string | null;
+  type: CourseworkType;
+}
+
 export interface Claim {
   id: string;
   submissionId?: string;
-  evidence: string;
-  claimDate: string | null;
-  confirmed: boolean;
-  source: ClaimSource;
+  courseworkId: string;
 }
 
 export interface Criterion {
@@ -59,6 +66,7 @@ export interface CourseSchema {
   courseTitle: string;
   courseCode: string;
   courseYear: string;
+  coursework: Coursework[];
   units: Unit[];
   rules?: CriteriaRules;
 }

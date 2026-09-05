@@ -4,6 +4,7 @@ export const defaultCourse: CourseSchema = {
   courseTitle: 'CPCAB Counselling Portfolio',
   courseCode: 'CPCAB-100',
   courseYear: '2025-2026',
+  coursework: [],
   rules: {
     perCriterion: { count: 2 },
     perType: {

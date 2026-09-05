@@ -21,13 +21,7 @@
         color="accent"
         icon="send"
         label="Submit work"
-        @click="openSubmitWorkDialog()"
-      />
-      <q-fab-action
-        color="secondary"
-        icon="visibility"
-        label="View submitted work"
-        @click="submittedWorkDialogVisible = true"
+        @click="openCourseworkDialog()"
       />
     </q-fab>
 
@@ -56,7 +50,6 @@
           </q-item-section>
           <q-item-section class="text-weight-medium">Course Criteria Overview</q-item-section>
         </q-item>
-        <q-separator class="q-my-sm" />
         <q-item
           v-for="item in navigationItems.slice(1)"
           :key="item.value"
@@ -147,6 +140,67 @@
             <q-btn flat color="primary" label="View Criteria" @click="selectNavigationItem(navigationItems[1]?.value || 'overview')" />
           </div>
         </div>
+      </div>
+
+      <div v-else-if="activeMenuItem === 'submitted-work'">
+        <q-card>
+          <q-card-section class="row items-center q-gutter-sm">
+            <div class="col">
+              <div class="text-h6">Submitted work</div>
+              <div class="text-caption">Track work items, attach them to criteria, and update the status of submissions.</div>
+            </div>
+            <div class="col-auto">
+              <q-btn dense color="primary" icon="add" label="New coursework" @click="openCourseworkDialog()" />
+            </div>
+          </q-card-section>
+          <q-separator />
+          <q-card-section>
+            <div v-if="submittedWorkGroups.length === 0" class="text-grey text-center q-pa-md">
+              No coursework has been recorded yet.
+            </div>
+            <div v-else class="row q-col-gutter-md">
+              <div v-for="group in submittedWorkGroups" :key="group.id" class="col-12">
+                <q-card bordered flat>
+                  <q-card-section>
+                    <div class="row items-start q-gutter-sm">
+                      <div class="col">
+                        <div class="text-subtitle2">Work</div>
+                        <div class="text-body1">{{ group.evidence }}</div>
+                      </div>
+                      <div class="col-auto">
+                        <q-chip :color="group.confirmed ? 'positive' : 'grey-5'" text-color="white" dense>
+                          {{ group.confirmed ? 'Confirmed' : 'Pending' }}
+                        </q-chip>
+                      </div>
+                    </div>
+                    <div class="row q-gutter-sm q-mt-sm">
+                      <div class="col-12 col-sm-6">
+                        <div class="text-caption">Date</div>
+                        <div>{{ formatDisplayDate(group.claimDate, 'Not recorded', false) }}</div>
+                      </div>
+                      <div class="col-12 col-sm-6">
+                        <div class="text-caption">Source</div>
+                        <div>{{ group.source }}</div>
+                      </div>
+                    </div>
+                    <div class="q-mt-md">
+                      <div class="text-caption">Claimed criteria</div>
+                      <div class="q-gutter-xs q-mt-xs">
+                        <q-chip v-for="criterion in group.criteria" :key="`${group.id}-${criterion.unitId}-${criterion.sectionId}-${criterion.criterionId}`" dense outline>
+                          {{ criterion.label }}
+                        </q-chip>
+                      </div>
+                    </div>
+                    <div class="row justify-end q-gutter-sm q-mt-lg">
+                      <q-btn dense flat icon="edit" color="primary" @click="openCourseworkDialog(group)" />
+                      <ButtonWithConfirmation dense flat icon="delete" color="negative" confirm-message="Delete this coursework item and all linked claims?" @confirm="deleteCoursework(group.id)" />
+                    </div>
+                  </q-card-section>
+                </q-card>
+              </div>
+            </div>
+          </q-card-section>
+        </q-card>
       </div>
 
       <div v-else>
@@ -248,7 +302,7 @@
                             <div class="col">{{ criterion.id }} – {{ criterion.title }}</div>
                             <div class="col-auto">
                               <div class="row items-center q-gutter-xs">
-                                <q-icon v-for="(claim, i) in criterion.claims" :key="`claim-${i}`" :name="i < (course.rules?.perCriterion?.count ?? 1) ? 'check_circle' : 'circle'" :color="getClaimSourceColour(claim.source)" size="sm" />
+                                <q-icon v-for="(claim, i) in criterion.claims" :key="`claim-${i}`" :name="i < (course.rules?.perCriterion?.count ?? 1) ? 'check_circle' : 'circle'" :color="getClaimSourceColour(getClaimType(claim))" size="sm" />
                                 <q-icon v-for="i in Math.max(0, (course.rules?.perCriterion?.count ?? 1) - criterion.claims.length)" :key="`unclaimed-${i}`" name="radio_button_unchecked" color="grey-5" size="sm" />
                               </div>
                             </div>
@@ -270,19 +324,24 @@
                         <div v-if="criterion.claims.length === 0" class="text-grey">No claims recorded for this criterion yet.</div>
                         <div v-else>
                           <q-table :rows="criterion.claims" :columns="claimColumns" row-key="id" flat dense>
+                            <template #body-cell-evidence="props">
+                              <q-td :props="props" align="left">
+                                {{ getClaimName(props.row) || 'Not recorded' }}
+                              </q-td>
+                            </template>
                             <template #body-cell-claimDate="props">
                               <q-td :props="props" align="center">
-                                {{ formatDisplayDate(props.row.claimDate, 'Not recorded', false) }}
+                                {{ formatDisplayDate(getClaimDate(props.row), 'Not recorded', false) }}
                               </q-td>
                             </template>
                             <template #body-cell-source="props">
                               <q-td :props="props" align="center">
-                                <q-chip :color="getClaimSourceColour(props.row.source)" text-color="white">{{props.row.source}}</q-chip>
+                                <q-chip :color="getClaimSourceColour(getClaimType(props.row))" text-color="white">{{ getClaimType(props.row) }}</q-chip>
                               </q-td>
                             </template>
                             <template #body-cell-confirmed="props">
                               <q-td :props="props" align="center">
-                                <q-checkbox v-model="props.row.confirmed" />
+                                <q-checkbox :model-value="isClaimConfirmed(props.row)" @update:model-value="updateClaimConfirmed(props.row, $event)" />
                               </q-td>
                             </template>
                             <template #body-cell-action="props">
@@ -314,13 +373,29 @@
         <q-separator />
         <q-card-section>
           <q-form @submit.prevent="saveClaimDialog">
+            <q-select
+              v-model="claimDialogContext.courseworkId"
+              :options="courseworkOptions"
+              :display-value="claimDialogContext.courseworkId ? getCourseworkLabel(claimDialogContext.courseworkId) : undefined"
+              label="Existing coursework"
+              dense
+              clearable
+              emit-value
+              map-options
+              option-label="label"
+              option-value="value"
+              :disable="!!claimDialogContext.evidence.trim()"
+              hint="Select an existing piece of work or leave blank to create a new one"
+              class="q-mb-md"
+            />
             <q-input
               v-model="claimDialogContext.evidence"
-              label="Evidence / Work"
+              label="New work name"
               type="textarea"
               autogrow
               dense
               class="q-mb-md"
+              :disable="!!claimDialogContext.courseworkId"
             />
             <div class="row q-gutter-md">
               <div class="col-12 col-md-6">
@@ -347,17 +422,17 @@
       </q-card>
     </q-dialog>
 
-    <q-dialog v-model="submitWorkDialogVisible" persistent>
+    <q-dialog v-model="courseworkDialogVisible" persistent>
       <q-card>
         <q-card-section>
-          <div class="text-h6">Submit Work for Multiple Criteria</div>
-          <div class="text-caption">Enter the work details and select the criteria to attach this claim to.</div>
+          <div class="text-h6">{{ courseworkDialogContext.courseworkId ? 'Edit' : 'Submit' }} coursework</div>
+          <div class="text-caption">Add or update the submitted work and attach it to one or more criteria.</div>
         </q-card-section>
         <q-separator />
         <q-card-section>
-          <q-form @submit.prevent="saveSubmitWorkDialog">
+          <q-form @submit.prevent="saveCourseworkDialog">
             <q-input
-              v-model="submitWorkContext.evidence"
+              v-model="courseworkDialogContext.name"
               label="Work / Evidence"
               type="textarea"
               autogrow
@@ -366,26 +441,26 @@
             />
             <div class="row q-gutter-md">
               <div class="col-12 col-md-4">
-                <q-input v-model="submitWorkContext.claimDate" label="Claim date" type="date" dense />
+                <q-input v-model="courseworkDialogContext.date" label="Submission date" type="date" dense />
               </div>
               <div class="col-12 col-md-4">
                 <q-select
-                  v-model="submitWorkContext.source"
+                  v-model="courseworkDialogContext.type"
                   :options="claimSources"
-                  label="Claim type"
+                  label="Work type"
                   dense
                   emit-value
                   map-options
                 />
               </div>
               <div class="col-12 col-md-4">
-                <q-checkbox v-model="submitWorkContext.confirmed" label="Tutor confirmed" dense class="q-mt-sm" />
+                <q-checkbox v-model="courseworkDialogContext.confirmed" label="Tutor confirmed" dense class="q-mt-sm" />
               </div>
             </div>
             <q-select
-              v-model="submitWorkContext.selectedCriteria"
+              v-model="courseworkDialogContext.selectedCriteria"
               :options="criteriaOptions"
-              label="Select criteria to claim"
+              label="Select criteria to attach"
               hint="Search by criterion id or title"
               dense
               use-input
@@ -398,69 +473,11 @@
               class="q-mt-md"
             />
             <q-card-actions align="right" class="q-mt-md">
-              <q-btn flat label="Cancel" color="secondary" @click="submitWorkDialogVisible = false" />
-              <q-btn label="Submit work" color="primary" type="submit" />
+              <q-btn flat label="Cancel" color="secondary" @click="courseworkDialogVisible = false" />
+              <q-btn :label="courseworkDialogContext.courseworkId ? 'Save changes' : 'Submit work'" color="primary" type="submit" />
             </q-card-actions>
           </q-form>
         </q-card-section>
-      </q-card>
-    </q-dialog>
-
-    <q-dialog v-model="submittedWorkDialogVisible" persistent>
-      <q-card>
-        <q-card-section class="row items-center q-gutter-sm">
-          <div class="col">
-            <div class="text-h6">Submitted work overview</div>
-            <div class="text-caption">Each entry groups criteria by the submitted work name so related claims are shown together.</div>
-          </div>
-          <div class="col-auto">
-            <q-btn flat round icon="close" @click="submittedWorkDialogVisible = false" />
-          </div>
-        </q-card-section>
-        <q-separator />
-        <q-card-section>
-          <div v-if="submittedWorkGroups.length === 0" class="text-grey text-center q-pa-md">
-            No submitted work has been recorded yet.
-          </div>
-          <div v-else class="q-gutter-md">
-            <q-card v-for="group in submittedWorkGroups" :key="group.submissionId" bordered flat>
-              <q-card-section>
-                <div class="row items-start q-gutter-sm">
-                  <div class="col">
-                    <div class="text-subtitle2">Work</div>
-                    <div class="text-body1">{{ group.evidence }}</div>
-                  </div>
-                  <div class="col-auto">
-                    <q-chip :color="group.confirmed ? 'positive' : 'grey-5'" text-color="white" dense>
-                      {{ group.confirmed ? 'Confirmed' : 'Pending' }}
-                    </q-chip>
-                  </div>
-                </div>
-                <div class="row q-gutter-sm q-mt-sm">
-                  <div class="col-12 col-sm-6">
-                    <div class="text-caption">Date</div>
-                    <div>{{ formatDisplayDate(group.claimDate, 'Not recorded', false) }}</div>
-                  </div>
-                  <div class="col-12 col-sm-6">
-                    <div class="text-caption">Source</div>
-                    <div>{{ group.source }}</div>
-                  </div>
-                </div>
-                <div class="q-mt-md">
-                  <div class="text-caption">Claimed criteria</div>
-                  <div class="q-gutter-xs q-mt-xs">
-                    <q-chip v-for="criterion in group.criteria" :key="`${criterion.unitId}-${criterion.sectionId}-${criterion.criterionId}`" dense outline>
-                      {{ criterion.label }}
-                    </q-chip>
-                  </div>
-                </div>
-              </q-card-section>
-            </q-card>
-          </div>
-        </q-card-section>
-        <q-card-actions align="right">
-          <q-btn flat label="Close" color="secondary" @click="submittedWorkDialogVisible = false" />
-        </q-card-actions>
       </q-card>
     </q-dialog>
   </q-page>
@@ -493,7 +510,7 @@
 import { computed, reactive, ref, watch } from 'vue';
 import { formatDisplayDate } from '@/utils/formatDate';
 import { Notify, useQuasar } from 'quasar';
-import type { Claim, ClaimSource, CourseSchema, Unit } from '@/types';
+import type { Claim, ClaimSource, CourseSchema, Coursework, Unit } from '@/types';
 import { useCourseStore } from '@/composables/useCourseStore';
 import { uuid } from '@/utils/uuid';
 import FireworksDisplay from '@/components/FireworksDisplay.vue';
@@ -518,7 +535,8 @@ function sectionAnchorId(unitId: string, sectionId: string) {
 
 const navigationItems = computed(() => {
   const items: Array<{ value: string; label: string; icon: string }> = [
-    { value: 'overview', label: 'Overview', icon: 'dashboard' }
+    { value: 'overview', label: 'Overview', icon: 'dashboard' },
+    { value: 'submitted-work', label: 'Submitted work', icon: 'assignment' }
   ];
 
   const numberIconFor = (number: string) => {
@@ -579,6 +597,7 @@ const claimDialogContext = reactive({
   criterionId: '',
   criterionTitle: '',
   claimId: '',
+  courseworkId: '' as string,
   evidence: '',
   claimDate: null as string | null,
   source: 'Written' as ClaimSource,
@@ -590,6 +609,63 @@ const claimSources = [
   'Testimony',
   'TutorObservation'
 ] as ClaimSource[];
+
+function findCourseworkById(courseworkId: string | null | undefined): Coursework | null {
+  if (!courseworkId) {
+    return null;
+  }
+  return course.coursework.find((item) => item.id === courseworkId) ?? null;
+}
+
+function getCourseworkLabel(courseworkId: string | null | undefined) {
+  return findCourseworkById(courseworkId)?.name ?? 'Unknown coursework';
+}
+
+function getClaimName(claim: Claim) {
+  return findCourseworkById(claim.courseworkId)?.name ?? '';
+}
+
+function getClaimDate(claim: Claim) {
+  return findCourseworkById(claim.courseworkId)?.date ?? null;
+}
+
+function getClaimType(claim: Claim): ClaimSource {
+  return findCourseworkById(claim.courseworkId)?.type ?? 'Written';
+}
+
+function isClaimConfirmed(claim: Claim) {
+  return findCourseworkById(claim.courseworkId)?.confirmed ?? false;
+}
+
+function syncCourseworkOnClaim(claim: Claim, payload: Pick<Coursework, 'name' | 'date' | 'type' | 'confirmed'>) {
+  const existing = findCourseworkById(claim.courseworkId);
+
+  if (existing) {
+    existing.name = payload.name;
+    existing.date = payload.date;
+    existing.type = payload.type;
+    existing.confirmed = payload.confirmed;
+    return existing;
+  }
+
+  const newCoursework: Coursework = {
+    id: claim.courseworkId,
+    name: payload.name,
+    confirmed: payload.confirmed,
+    date: payload.date,
+    type: payload.type
+  };
+
+  course.coursework.push(newCoursework);
+  return newCoursework;
+}
+
+function updateClaimConfirmed(claim: Claim, value: boolean) {
+  const coursework = findCourseworkById(claim.courseworkId);
+  if (coursework) {
+    coursework.confirmed = value;
+  }
+}
 
 const requiredSources = computed(() => {
   const counts = course.rules?.perType?.counts;
@@ -638,8 +714,7 @@ const isCourseComplete = computed(() => {
 });
 
 
-const submitWorkDialogVisible = ref(false);
-const submittedWorkDialogVisible = ref(false);
+const courseworkDialogVisible = ref(false);
 const searchQuery = ref('');
 const selectedUnitIds = ref<string[]>([]);
 const selectedWorkEvidence = ref<string | null>(null);
@@ -652,20 +727,28 @@ const unitOptions = computed(() =>
   }))
 );
 
+const courseworkDialogContext = reactive({
+  courseworkId: '',
+  name: '',
+  date: null as string | null,
+  type: 'Written' as ClaimSource,
+  confirmed: false,
+  selectedCriteria: [] as string[]
+});
+
+const courseworkOptions = computed(() =>
+  course.coursework.map((item) => ({
+    label: item.name,
+    value: item.id
+  }))
+);
+
 const workEvidenceOptions = computed(() => {
   const groups = submittedWorkGroups.value;
   return groups.map((group) => ({
     label: group.evidence,
     value: group.evidence
   }));
-});
-
-const submitWorkContext = reactive({
-  evidence: '',
-  claimDate: null as string | null,
-  source: 'Written' as ClaimSource,
-  confirmed: false,
-  selectedCriteria: [] as string[]
 });
 
 const criteriaOptions = computed(() => {
@@ -683,57 +766,27 @@ const criteriaOptions = computed(() => {
   return options;
 });
 
-const submittedWorkGroups = computed(() => {
-  const groups = new Map<string, {
-    evidence: string;
-    claimDate: string | null;
-    source: ClaimSource;
-    confirmed: boolean;
-    criteria: Array<{ unitId: string; sectionId: string; criterionId: string; label: string }>;
-  }>();
-
-  course.units.forEach((unit) => {
-    unit.sections.forEach((section) => {
-      section.criteria.forEach((criterion) => {
-        criterion.claims.forEach((claim) => {
-          const workKey = claim.evidence.trim().toLowerCase();
-          const existingGroup = groups.get(workKey);
-          const criterionLabel = `${criterion.id} – ${criterion.title}`;
-
-          if (existingGroup) {
-            const alreadyAttached = existingGroup.criteria.some(
-              (item) => item.unitId === unit.id && item.sectionId === section.id && item.criterionId === criterion.id
-            );
-
-            if (!alreadyAttached) {
-              existingGroup.criteria.push({
-                unitId: unit.id,
-                sectionId: section.id,
-                criterionId: criterion.id,
-                label: criterionLabel
-              });
-            }
-          } else {
-            groups.set(workKey, {
-              evidence: claim.evidence,
-              claimDate: claim.claimDate,
-              source: claim.source,
-              confirmed: claim.confirmed,
-              criteria: [{
-                unitId: unit.id,
-                sectionId: section.id,
-                criterionId: criterion.id,
-                label: criterionLabel
-              }]
-            });
-          }
-        });
+const submittedWorkGroups = computed(() =>
+  course.coursework.map((item) => ({
+    id: item.id,
+    evidence: item.name,
+    claimDate: item.date,
+    source: item.type,
+    confirmed: item.confirmed,
+    criteria: course.units.flatMap((unit) => {
+      return unit.sections.flatMap((section) => {
+        return section.criteria
+          .filter((criterion) => criterion.claims.some((claim) => claim.courseworkId === item.id))
+          .map((criterion) => ({
+            unitId: unit.id,
+            sectionId: section.id,
+            criterionId: criterion.id,
+            label: `${criterion.id} – ${criterion.title}`
+          }));
       });
-    });
-  });
-
-  return Array.from(groups.values());
-});
+    })
+  }))
+);
 
 function getClaimSourceColour(source: ClaimSource) {
   switch (source) {
@@ -764,8 +817,8 @@ function criterionMatchesQuery(criterion: { id: string; title: string; guidance:
     criterion.id,
     criterion.title,
     criterion.guidance.join(' '),
-    criterion.claims.map((claim) => claim.evidence).join(' '),
-    criterion.claims.map((claim) => claim.source).join(' ')
+    criterion.claims.map((claim) => getClaimName(claim)).join(' '),
+    criterion.claims.map((claim) => getClaimType(claim)).join(' ')
   ];
 
   return haystacks.some((value) => matchesText(value, query));
@@ -818,7 +871,7 @@ const filteredUnits = computed(() => {
 
         if (selectedWorkEvidence.value) {
           criteria = criteria.filter((criterion) =>
-            (criterion.claims?.length ?? 0) > 0 && criterion.claims.some((claim) => claim.evidence === selectedWorkEvidence.value)
+            (criterion.claims?.length ?? 0) > 0 && criterion.claims.some((claim) => getClaimName(claim) === selectedWorkEvidence.value)
           );
         }
 
@@ -851,13 +904,16 @@ function openClaimDialog(unitId: string, sectionId: string, criterion: { id: str
   claimDialogContext.criterionTitle = criterion.title;
 
   if (claim) {
+    const coursework = findCourseworkById(claim.courseworkId);
     claimDialogContext.claimId = claim.id;
-    claimDialogContext.evidence = claim.evidence;
-    claimDialogContext.claimDate = claim.claimDate;
-    claimDialogContext.source = claim.source;
-    claimDialogContext.confirmed = claim.confirmed;
+    claimDialogContext.courseworkId = claim.courseworkId;
+    claimDialogContext.evidence = coursework?.name ?? '';
+    claimDialogContext.claimDate = coursework?.date ?? null;
+    claimDialogContext.source = coursework?.type ?? 'Written';
+    claimDialogContext.confirmed = coursework?.confirmed ?? false;
   } else {
     claimDialogContext.claimId = '';
+    claimDialogContext.courseworkId = '';
     claimDialogContext.evidence = '';
     claimDialogContext.claimDate = null;
     claimDialogContext.source = 'Written';
@@ -868,11 +924,6 @@ function openClaimDialog(unitId: string, sectionId: string, criterion: { id: str
 }
 
 function saveClaimDialog() {
-  if (!claimDialogContext.evidence.trim()) {
-    Notify.create({ type: 'negative', message: 'Enter evidence for the claim before saving.' });
-    return;
-  }
-
   const unit = course.units.find((u) => u.id === claimDialogContext.unitId);
   const section = unit?.sections.find((s) => s.id === claimDialogContext.sectionId);
   const criterion = section?.criteria.find((c) => c.id === claimDialogContext.criterionId);
@@ -882,22 +933,60 @@ function saveClaimDialog() {
     return;
   }
 
+  const selectedCourseworkId = claimDialogContext.courseworkId || null;
+  const newName = claimDialogContext.evidence.trim();
+  const selectedCoursework = selectedCourseworkId ? findCourseworkById(selectedCourseworkId) : null;
+
+  if (!selectedCoursework && !newName) {
+    Notify.create({ type: 'negative', message: 'Select an existing coursework item or enter a new work name before saving.' });
+    return;
+  }
+
+  const resolveCourseworkId = () => {
+    if (selectedCourseworkId && selectedCoursework) {
+      return selectedCoursework.id;
+    }
+
+    const newId = uuid();
+    course.coursework.push({
+      id: newId,
+      name: newName,
+      confirmed: claimDialogContext.confirmed,
+      date: claimDialogContext.claimDate || null,
+      type: claimDialogContext.source
+    });
+    return newId;
+  };
+
+  const courseworkId = resolveCourseworkId();
+
+  if (selectedCoursework) {
+    selectedCoursework.name = selectedCoursework.name || newName || selectedCoursework.name;
+    selectedCoursework.date = claimDialogContext.claimDate || selectedCoursework.date;
+    selectedCoursework.type = claimDialogContext.source;
+    selectedCoursework.confirmed = claimDialogContext.confirmed;
+  }
+
+  if (!selectedCoursework && newName) {
+    const coursework = findCourseworkById(courseworkId);
+    if (coursework) {
+      coursework.name = newName;
+      coursework.date = claimDialogContext.claimDate || null;
+      coursework.type = claimDialogContext.source;
+      coursework.confirmed = claimDialogContext.confirmed;
+    }
+  }
+
   if (claimDialogContext.claimId) {
     const claim = criterion.claims.find((c) => c.id === claimDialogContext.claimId);
     if (claim) {
-      claim.evidence = claimDialogContext.evidence;
-      claim.claimDate = claimDialogContext.claimDate;
-      claim.source = claimDialogContext.source;
-      claim.confirmed = claimDialogContext.confirmed;
+      claim.courseworkId = courseworkId;
       Notify.create({ type: 'positive', message: 'Claim updated successfully.' });
     }
   } else {
     criterion.claims.push({
       id: uuid(),
-      evidence: claimDialogContext.evidence,
-      claimDate: claimDialogContext.claimDate || null,
-      source: claimDialogContext.source,
-      confirmed: claimDialogContext.confirmed
+      courseworkId
     });
     Notify.create({ type: 'positive', message: 'Claim added successfully.' });
   }
@@ -905,13 +994,33 @@ function saveClaimDialog() {
   claimDialogVisible.value = false;
 }
 
-function openSubmitWorkDialog() {
-  submitWorkContext.evidence = '';
-  submitWorkContext.claimDate = null;
-  submitWorkContext.source = 'Written';
-  submitWorkContext.confirmed = false;
-  submitWorkContext.selectedCriteria = [];
-  submitWorkDialogVisible.value = true;
+function openCourseworkDialog(coursework?: { id: string; evidence: string; claimDate: string | null; source: ClaimSource; confirmed: boolean }) {
+  if (coursework) {
+    courseworkDialogContext.courseworkId = coursework.id;
+    courseworkDialogContext.name = coursework.evidence;
+    courseworkDialogContext.date = coursework.claimDate;
+    courseworkDialogContext.type = coursework.source;
+    courseworkDialogContext.confirmed = coursework.confirmed;
+    courseworkDialogContext.selectedCriteria = []; 
+    course.units.forEach((unit) => {
+      unit.sections.forEach((section) => {
+        section.criteria.forEach((criterion) => {
+          if (criterion.claims.some((claim) => claim.courseworkId === coursework.id)) {
+            courseworkDialogContext.selectedCriteria.push(`${unit.id}|${section.id}|${criterion.id}`);
+          }
+        });
+      });
+    });
+  } else {
+    courseworkDialogContext.courseworkId = '';
+    courseworkDialogContext.name = '';
+    courseworkDialogContext.date = null;
+    courseworkDialogContext.type = 'Written';
+    courseworkDialogContext.confirmed = false;
+    courseworkDialogContext.selectedCriteria = [];
+  }
+
+  courseworkDialogVisible.value = true;
 }
 
 function parseCriteriaIdentifier(identifier: string) {
@@ -919,35 +1028,85 @@ function parseCriteriaIdentifier(identifier: string) {
   return { unitId, sectionId, criterionId };
 }
 
-function saveSubmitWorkDialog() {
-  if (!submitWorkContext.evidence.trim()) {
-    Notify.create({ type: 'negative', message: 'Enter the work evidence before submitting.' });
+function saveCourseworkDialog() {
+  if (!courseworkDialogContext.name.trim()) {
+    Notify.create({ type: 'negative', message: 'Enter the work name before submitting.' });
     return;
   }
 
-  if (submitWorkContext.selectedCriteria.length === 0) {
+  if (courseworkDialogContext.selectedCriteria.length === 0) {
     Notify.create({ type: 'negative', message: 'Select at least one criterion to attach this work to.' });
     return;
   }
 
-  submitWorkContext.selectedCriteria.forEach((criteriaKey) => {
-    const { unitId, sectionId, criterionId } = parseCriteriaIdentifier(criteriaKey);
-    const unit = course.units.find((u) => u.id === unitId);
-    const section = unit?.sections.find((s) => s.id === sectionId);
-    const criterion = section?.criteria.find((c) => c.id === criterionId);
-    if (criterion) {
-      criterion.claims.push({
-        id: uuid(),
-        evidence: submitWorkContext.evidence,
-        claimDate: submitWorkContext.claimDate || null,
-        source: submitWorkContext.source,
-        confirmed: submitWorkContext.confirmed
+  const normalizedName = courseworkDialogContext.name.trim();
+  const courseworkId = courseworkDialogContext.courseworkId || uuid();
+
+  const existing = course.coursework.find((item) => item.id === courseworkId);
+  if (existing) {
+    existing.name = normalizedName;
+    existing.date = courseworkDialogContext.date || null;
+    existing.type = courseworkDialogContext.type;
+    existing.confirmed = courseworkDialogContext.confirmed;
+  } else {
+    course.coursework.push({
+      id: courseworkId,
+      name: normalizedName,
+      confirmed: courseworkDialogContext.confirmed,
+      date: courseworkDialogContext.date || null,
+      type: courseworkDialogContext.type
+    });
+  }
+
+  const currentlyAttached = new Set<string>();
+  course.units.forEach((unit) => {
+    unit.sections.forEach((section) => {
+      section.criteria.forEach((criterion) => {
+        const matches = criterion.claims.filter((claim) => claim.courseworkId === courseworkId);
+        matches.forEach((claim) => {
+          currentlyAttached.add(`${unit.id}|${section.id}|${criterion.id}`);
+        });
       });
-    }
+    });
   });
 
-  Notify.create({ type: 'positive', message: 'Work submitted and claims created successfully.' });
-  submitWorkDialogVisible.value = false;
+  course.units.forEach((unit) => {
+    unit.sections.forEach((section) => {
+      section.criteria.forEach((criterion) => {
+        const key = `${unit.id}|${section.id}|${criterion.id}`;
+        const isSelected = courseworkDialogContext.selectedCriteria.includes(key);
+        const existingClaims = criterion.claims.filter((claim) => claim.courseworkId === courseworkId);
+
+        if (isSelected && existingClaims.length === 0) {
+          criterion.claims.push({ id: uuid(), courseworkId });
+        }
+
+        if (!isSelected && existingClaims.length > 0) {
+          criterion.claims = criterion.claims.filter((claim) => !(claim.courseworkId === courseworkId));
+        }
+      });
+    });
+  });
+
+  if (courseworkDialogContext.courseworkId) {
+    Notify.create({ type: 'positive', message: 'Coursework updated successfully.' });
+  } else {
+    Notify.create({ type: 'positive', message: 'Work submitted and claims created successfully.' });
+  }
+
+  courseworkDialogVisible.value = false;
+}
+
+function deleteCoursework(courseworkId: string) {
+  course.coursework = course.coursework.filter((item) => item.id !== courseworkId);
+  course.units.forEach((unit) => {
+    unit.sections.forEach((section) => {
+      section.criteria.forEach((criterion) => {
+        criterion.claims = criterion.claims.filter((claim) => claim.courseworkId !== courseworkId);
+      });
+    });
+  });
+  Notify.create({ type: 'warning', message: 'Coursework deleted.' });
 }
 
 function removeClaim(unitId: string, sectionId: string, criterionId: string, claimId: string) {
@@ -962,7 +1121,7 @@ function removeClaim(unitId: string, sectionId: string, criterionId: string, cla
 }
 
 function unitSourceCount(unit: Unit, source: ClaimSource) {
-  return unit.sections.reduce((count, section) => count + section.criteria.reduce((sectionCount, criterion) => sectionCount + criterion.claims.filter((claim) => claim.source === source).length, 0), 0);
+  return unit.sections.reduce((count, section) => count + section.criteria.reduce((sectionCount, criterion) => sectionCount + criterion.claims.filter((claim) => getClaimType(claim) === source).length, 0), 0);
 }
 
 function courseUnit(unitId: string) {
@@ -982,7 +1141,7 @@ function courseSection(unitId: string, sectionId: string) {
 }
 
 function sectionSourceCount(section: Unit['sections'][0], source: ClaimSource) {
-  return section.criteria.reduce((count, criterion) => count + criterion.claims.filter((claim) => claim.source === source).length, 0);
+  return section.criteria.reduce((count, criterion) => count + criterion.claims.filter((claim) => getClaimType(claim) === source).length, 0);
 }
 
 function sectionComplete(section: Unit['sections'][0]) {

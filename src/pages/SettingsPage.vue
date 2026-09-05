@@ -217,6 +217,10 @@ function exportSupervisionCsv() {
   Notify.create({ type: 'positive', message: 'Supervision CSV exported.' });
 }
 
+function getCourseworkForClaim(course: CourseSchema | null, claim: Claim) {
+  return course?.coursework.find((item) => item.id === claim.courseworkId) ?? null;
+}
+
 function exportCriteriaCsv() {
   const { course } = getCurrentState();
   const rows: string[][] = [[formatCsvValue(course?.courseCode)]];
@@ -233,9 +237,10 @@ function exportCriteriaCsv() {
           const guidance = criterion.guidance.map((item) => `• ${item}`).join('\n');
           const claims = criterion.claims
             .map((claim) => {
-              const formattedDate = formatDisplayDate(claim.claimDate, '', false);
+              const coursework = getCourseworkForClaim(course, claim);
+              const formattedDate = formatDisplayDate(coursework?.date ?? null, '', false);
 
-              return `${claim.evidence} ${formattedDate} (${claim.source})`.trim();
+              return `${coursework?.name ?? 'Unknown work'} ${formattedDate} (${coursework?.type ?? 'Written'})`.trim();
             })
             .join('\n');
 
