@@ -137,7 +137,7 @@
 
         <div class="row justify-center q-mt-md">
           <div class="col-auto">
-            <q-btn flat color="primary" label="View Criteria" @click="selectNavigationItem(navigationItems[1]?.value || 'overview')" />
+            <q-btn flat color="primary" label="View Criteria" @click="selectNavigationItem(navigationItems[2]?.value || 'overview')" />
           </div>
         </div>
       </div>
