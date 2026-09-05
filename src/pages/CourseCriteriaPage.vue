@@ -1246,12 +1246,17 @@ function unitComplete(unit: Unit) {
   return unit.sections.every((section) => sectionComplete(section));
 }
 
-const claimColumns = [
+const allClaimColumns = [
   { name: 'evidence', label: 'Evidence', field: 'evidence', align: 'left' },
-  { name: 'claimDate', label: 'Date', field: 'claimDate', align: 'center' },
+  { name: 'claimDate', label: 'Date', field: 'claimDate', align: 'center', hideOnMobile: true },
   { name: 'source', label: 'Source', field: 'source', align: 'center' },
-  { name: 'confirmed', label: 'Confirmed', field: 'confirmed', align: 'center' },
+  { name: 'confirmed', label: 'Confirmed', field: 'confirmed', align: 'center', hideOnMobile: true },
   { name: 'action', label: 'Action', field: 'action', align: 'center' }
 ];
+const claimColumns = computed(() =>
+  allClaimColumns.filter(column =>
+    !$q.screen.lt.md || !column.hideOnMobile
+  )
+)
 
 </script>
