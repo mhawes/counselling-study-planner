@@ -186,12 +186,13 @@
                     <div class="q-mt-md">
                       <div class="text-caption">Claimed criteria</div>
                       <div class="q-gutter-xs q-mt-xs">
-                        <q-chip v-for="criterion in group.criteria" :key="`${group.id}-${criterion.unitId}-${criterion.sectionId}-${criterion.criterionId}`" dense outline>
+                        <q-chip class="ellipsis" v-for="criterion in group.criteria" :key="`${group.id}-${criterion.unitId}-${criterion.sectionId}-${criterion.criterionId}`" dense outline>
                           {{ criterion.label }}
                         </q-chip>
                       </div>
                     </div>
                     <div class="row justify-end q-gutter-sm q-mt-lg">
+                      <q-btn dense flat icon-right="article" color="secondary" aria-label="Generate criteria assessment sheet" label="CAS" @click="generateCriteriaAssessmentSheet(group)" />
                       <q-btn dense flat icon="edit" color="primary" @click="openCourseworkDialog(group)" />
                       <ButtonWithConfirmation dense flat icon="delete" color="negative" confirm-message="Delete this coursework item and all linked claims?" @confirm="deleteCoursework(group.id)" />
                     </div>
@@ -510,6 +511,10 @@
 import { computed, reactive, ref, watch } from 'vue';
 import { formatDisplayDate } from '@/utils/formatDate';
 import { Notify, useQuasar } from 'quasar';
+import { AlignmentType, BorderStyle, Document, Packer, Paragraph, Table, TableCell, TableRow, TextRun, WidthType } from 'docx';
+import PizZip from 'pizzip';
+import Docxtemplater from 'docxtemplater';
+import templateUrl from '@/data/cas_template.docx?url';
 import type { Claim, ClaimSource, CourseSchema, Coursework, Unit } from '@/types';
 import { useCourseStore } from '@/composables/useCourseStore';
 import { uuid } from '@/utils/uuid';
@@ -1107,6 +1112,73 @@ function deleteCoursework(courseworkId: string) {
     });
   });
   Notify.create({ type: 'warning', message: 'Coursework deleted.' });
+}
+
+function buildCriteriaAssessmentRows(courseworkId: string) {
+  const rows: Array<{ unit: string; criteriaNo: string }> = [];
+
+  course.units.forEach((unit) => {
+    unit.sections.forEach((section) => {
+      section.criteria.forEach((criterion) => {
+        if (criterion.claims.some((claim) => claim.courseworkId === courseworkId)) {
+          rows.push({
+            unit: unit.id,
+            criteriaNo: criterion.id.substring(criterion.id.indexOf('.') + 1)
+          });
+        }
+      });
+    });
+  });
+
+  return rows;
+}
+
+async function generateCriteriaAssessmentSheet(coursework: { id: string; evidence: string }) {
+  try {
+    const templateResponse = await fetch(templateUrl);
+    const arrayBuffer = await templateResponse.arrayBuffer();
+    const zip = new PizZip(arrayBuffer);
+
+    // Adjust tags in document.xml: convert {{tag}} to {tag} so Docxtemplater (default tags) can process Mustache-style template
+    const docXmlPath = 'word/document.xml';
+    if (zip.file(docXmlPath)) {
+      const docXml = zip.file(docXmlPath).asText();
+      const fixedXml = docXml.replace(/{{/g, '{').replace(/}}/g, '}');
+      zip.file(docXmlPath, fixedXml);
+    }
+
+    const doc = new Docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
+
+    const rows = buildCriteriaAssessmentRows(coursework.id);
+    const data = {
+      course: course.courseCode || '',
+      qualification: course.courseTitle || '',
+      coursework: coursework.evidence || '',
+      claims: rows.map((r) => ({ unit: r.unit, criteriaNo: r.criteriaNo }))
+    };
+
+    doc.setData(data);
+    doc.render();
+
+    const out = doc.getZip().generate({ type: 'blob' });
+
+    const worksheetName = `${coursework.evidence || 'criteria-assessment-sheet'}`.trim() || 'criteria-assessment-sheet';
+    const safeFilename = `${worksheetName.replace(/[^a-z0-9\-_]+/gi, '-').toLowerCase()}.docx`;
+
+    const url = URL.createObjectURL(out);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = safeFilename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    Notify.create({ type: 'positive', message: 'Criteria assessment sheet generated.' });
+  } catch (err) {
+    console.error('Failed to generate CAS:', err);
+    Notify.create({ type: 'negative', message: 'Failed to generate criteria assessment sheet.' });
+  }
 }
 
 function removeClaim(unitId: string, sectionId: string, criterionId: string, claimId: string) {
